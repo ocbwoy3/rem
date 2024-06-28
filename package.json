@@ -1,0 +1,43 @@
+{
+  "name": "prikolshub.ts",
+  "version": "1.0.0",
+  "description": "The PrikolsHub remote admin.",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "rm -r dist && tsc && node --no-deprecation dist/src/index.js",
+    "build": "tsc",
+    "start": "node --no-deprecation dist/src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ocbwoy3/PrikolsHub.ts.git"
+  },
+  "author": "OCbwoy3",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ocbwoy3/PrikolsHub.ts/issues"
+  },
+  "homepage": "https://github.com/ocbwoy3/PrikolsHub.ts#readme",
+  "dependencies": {
+    "@fastify/middie": "^8.3.1",
+    "@fastify/static": "^7.0.4",
+    "@sapphire/cli": "^1.9.3",
+    "@sapphire/discord.js-utilities": "^7.3.0",
+    "@sapphire/framework": "^5.2.1",
+    "@sapphire/time-utilities": "^1.7.12",
+    "axios": "^1.7.2",
+    "discord.js": "14.x",
+    "dotenv": "^16.4.5",
+    "fastify": "^4.27.0",
+    "noblox.js": "^4.15.1",
+    "nodemon": "^3.1.3",
+    "pino-pretty": "^11.2.1",
+    "secload": "^1.0.4",
+    "sharp": "^0.33.4",
+    "typescript": "^5.5.2",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.9"
+  }
+}
