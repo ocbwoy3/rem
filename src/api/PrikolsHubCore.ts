@@ -1,5 +1,6 @@
 import { Client, TextChannel } from "discord.js";
 import { Session } from "./Session";
+import * as config from "../../config.json";
 
 export class PrikolsHubRuntime {
 
@@ -15,6 +16,10 @@ export class PrikolsHubRuntime {
 		this.DiscordClient = discordClient
 	}
 
+	public async setup(): Promise<void> {
+		this.SessionRequestsChannel = (await this.DiscordClient?.channels.fetch(config.SessionRequestsChannelId)) as TextChannel
+	}
+	
 	public async getSessionByJobId(jobId:string): Promise<Session|null> {
 		for (let i=0; i < this.Sessions.length; i++) {
 			if (this.Sessions[i].JobId == jobId) {
@@ -37,8 +42,12 @@ export class PrikolsHubRuntime {
 		return this.Sessions
 	}
 
-	public async createSessionRequest(): Promise<void> {
-
+	public async createSession(placeId:number,jobId:string,ipAddress:string): Promise<void> {
+		const newSession = new Session(placeId,jobId,ipAddress)
+		this.Sessions.push(newSession)
+		await this.SessionRequestsChannel?.send({
+			content: `ph_debug NewSession ${placeId.toString()} ${jobId} ${ipAddress}`
+		})
 	}
 
 }

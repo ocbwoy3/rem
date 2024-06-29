@@ -10,11 +10,12 @@ export interface SessionData {
 }
 
 export abstract class BaseSession implements SessionData {
-	GameName: string = "<Uninitalized Session>"
-	SessionRegion: string = "<Uninitalized Setup()>"
-	ServerIPAddress: string = "<Uninitalized Session>"
-	JobId: string = "<Uninitalized Session>"
-	PlaceId: number = -2
+	public GameName: string = "<Uninitalized Session>"
+	public SessionRegion: string = "<Uninitalized Setup()>"
+	public ServerIPAddress: string = "<Uninitalized Session>"
+	public JobId: string = "<Uninitalized Session>"
+	public PlaceId: number = -2
+	public SessionAccepted: boolean = false
 
 	private QueuedDiscordMessages: QueuedDiscordMessage[] = []
 	private SessionPlayers: SessionPlayer[] = []
@@ -46,6 +47,13 @@ export abstract class BaseSession implements SessionData {
 	}
 
 	/**
+	 * Accepts the session.
+	 */
+	public async AcceptSession(): Promise<void> {
+		this.SessionAccepted = true
+	}
+
+	/**
 	 * Processes a message.
 	 * @param msg The message to process.
 	 */
@@ -59,6 +67,12 @@ export abstract class BaseSession implements SessionData {
 	 * @returns Response to be sent back to the Roblox server.
 	 */
 	public async ProcessRequest(data: IncomingSessionMsgRequest): Promise<IncomingSessionMsgRequestResponse> {
+		if (this.SessionAccepted == false) {
+			return ({
+				error: "SessionNotAccepted"
+			} as IncomingSessionMsgRequestResponse)
+		}
+
 		const dat = Object.assign({},this.QueuedDiscordMessages)
 		for (let i=0; i<data.messages.length; i++) {
 			new Promise(async()=>{

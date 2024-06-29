@@ -4,7 +4,7 @@
   "description": "The PrikolsHub remote admin.",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "rm -r dist && tsc && node --no-deprecation dist/src/index.js",
+    "dev": "clear && trap \"rm -r dist\" EXIT && tsc && node --no-deprecation dist/src/index.js",
     "build": "tsc",
     "start": "node --no-deprecation dist/src/index.js"
   },
