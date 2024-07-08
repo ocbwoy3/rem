@@ -1,6 +1,9 @@
-import { Client, TextChannel } from "discord.js";
+import { ActionRow, ActionRowBuilder, Attachment, ButtonBuilder, ButtonStyle, Client, NewsChannel, RawFile, TextChannel } from "discord.js";
 import { Session } from "./Session";
 import * as config from "../../config.json";
+import { downloadFile } from "./Utility";
+import { tmpdir } from "os";
+import * as fs from 'node:fs';
 
 export class PrikolsHubRuntime {
 
@@ -29,6 +32,15 @@ export class PrikolsHubRuntime {
 		return null;
 	}
 
+	public async deleteSessionByJobId(jobId:string): Promise<void> {
+		for (let i=0; i < this.Sessions.length; i++) {
+			if (this.Sessions[i].JobId == jobId) {
+				delete this.Sessions[i];
+				console.log(`[PrikolsHub/Session] Deleted session "${jobId}"`)
+			}
+		}
+	}
+
 	public async getSessionByChannelId(channelId:number): Promise<Session|null> {
 		for (let i=0; i < this.Sessions.length; i++) {
 			if (this.Sessions[i].channelId == channelId) {
@@ -44,10 +56,37 @@ export class PrikolsHubRuntime {
 
 	public async createSession(placeId:number,jobId:string,ipAddress:string): Promise<void> {
 		const newSession = new Session(placeId,jobId,ipAddress)
+		await newSession.SetupSession()
 		this.Sessions.push(newSession)
+		console.log(`[PrikolsHub/Session] New session from "${newSession.GameName}" - ${newSession.PlaceId} (IP: ${newSession.ServerIPAddress})`)
+
+		const accept_session = new ButtonBuilder()
+			.setCustomId(`accept_mksession|${jobId}`)
+			.setLabel('Accept')
+			.setStyle(ButtonStyle.Success);
+
+		const decline_session = new ButtonBuilder()
+			.setCustomId(`reject_mksession|${jobId}`)
+			.setLabel('Decline')
+			.setStyle(ButtonStyle.Danger);
+
+		const row = new ActionRowBuilder()
+			.addComponents(accept_session, decline_session);
+
+		// download the thumbnail
+		const filepath = await downloadFile(newSession.thumbnailUrl,`${tmpdir()}/prikolshub-temp-${(new Date()).getMilliseconds().toString()}.png`)
+
 		await this.SessionRequestsChannel?.send({
-			content: `ph_debug NewSession ${placeId.toString()} ${jobId} ${ipAddress}`
+			content: `# [\`${newSession.GameName}\`]( <${newSession.gameUrl}> )
+			**JobId:** \`${jobId}\`
+			**lang.session_requests.server_ip:** \`${ipAddress}\``.replace(/\t/g,''),
+			components: ([row] as any),
+			files: [filepath]
 		})
+
+		await new Promise(f => setTimeout(f, 10000));
+
+		await fs.rmSync(filepath)
 	}
 
 }

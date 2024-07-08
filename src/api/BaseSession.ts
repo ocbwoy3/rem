@@ -1,4 +1,5 @@
-import { PlaceInformation, getPlaceInfo } from "noblox.js"
+import { PlaceInformation, ThumbnailRequest, getPlaceInfo, getThumbnails } from "noblox.js";
+import * as noblox from "noblox.js";
 import { IncomingSessionMsgRequest, IncomingSessionMsgRequestResponse, QueuedDiscordMessage, RobloxMessage, SessionPlayer } from "./Types"
 
 export interface SessionData {
@@ -7,6 +8,8 @@ export interface SessionData {
 	ServerIPAddress: string
 	JobId: string,
 	PlaceId: number,
+	thumbnailUrl: string,
+	gameUrl: string
 }
 
 export class BaseSession implements SessionData {
@@ -16,6 +19,8 @@ export class BaseSession implements SessionData {
 	public JobId: string = "<Uninitalized Session>"
 	public PlaceId: number = -2
 	public SessionAccepted: boolean = false
+	public thumbnailUrl: string = ""
+	public gameUrl: string = "";
 
 	private QueuedDiscordMessages: QueuedDiscordMessage[] = []
 	private SessionPlayers: SessionPlayer[] = []
@@ -31,9 +36,20 @@ export class BaseSession implements SessionData {
 	 */
 	public async SetupSession(): Promise<void> {
 		try {
-			const place: PlaceInformation = (await getPlaceInfo(this.PlaceId))[0]
+			const place: PlaceInformation = (await noblox.getPlaceInfo([this.PlaceId]))[0]
 			this.GameName = place.name
+			this.gameUrl = place.url
+			// console.log(place)
+			const thumbnails = await getThumbnails([({
+				type: 'GameThumbnail',
+				targetId: place.placeId,
+				format: 'png',
+				size: '768x432' // the biggest size roblox allows us to fetch
+			} as ThumbnailRequest)])
+			// console.log(thumbnails)
+			this.thumbnailUrl = thumbnails[0].imageUrl || ""
 		} catch (e_) {
+			console.error(e_)
 			this.GameName = "<Failed to fetch name>"
 		}
 	}
@@ -51,6 +67,7 @@ export class BaseSession implements SessionData {
 	 */
 	public async AcceptSession(...anything:any): Promise<void> {
 		// HACK: Fix Target sig provides too few args by adding ...anything:any to base func!!!
+		// TODO: Figure out an alternative in prod
 		this.SessionAccepted = true
 	}
 

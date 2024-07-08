@@ -12,6 +12,6 @@ export class Session extends BaseSession implements DiscordSessionData {
 
 	public async AcceptSession(forumThread:ThreadChannel): Promise<void> {
 		// some housekeeping here or something
-		super.AcceptSession()
+		super.AcceptSession() // TODO: Use an alternative for prod
 	}
 }

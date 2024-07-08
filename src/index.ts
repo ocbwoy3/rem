@@ -11,12 +11,13 @@ import { Session } from "./api/Session";
 import { RobloxMessage } from "./api/Types";
 import { PrikolsHubRuntime } from "./api/PrikolsHubCore";
 import { Client, Embed, TextChannel, APIEmbed, APIEmbedField, Channel } from "discord.js";
+import { setCookie } from "noblox.js";
 
 const client: Client = djs_client
+
+console.log("[PrikolsHub/Runtime] Loading execution context")
+
 const Runtime = new PrikolsHubRuntime(client)
-
-console.log("[PrikolsHub] Logging into Discord")
-
 setExecutionContext(Runtime)
 
 if ( config.LogStartup == true) {
@@ -40,11 +41,16 @@ if ( config.LogStartup == true) {
 }
 
 client.on('ready',async()=>{
+	console.log("[PrikolsHub/Roblox] Authenticating with ROBLOSECURITY token")
+	const userinfo = await setCookie(process.env.ROBLOSECURITY as string)
+	console.log(`[PrikolsHub/Roblox] Logged in using token as ${userinfo.UserName} (${userinfo.UserID})`)
 	await Runtime.setup()
 	console.log('wait')
-	await new Promise(f => setTimeout(f, 5000));
+	await new Promise(f => setTimeout(f, 1000));
 	console.log('newses')
-	await Runtime.createSession(6942069420,'00000000-0000-0000-000000000000','127.0.0.1')
+	// 11195100561 is rfti
+	await Runtime.createSession(11195100561,'00000000-0000-0000-000000000000','127.0.0.1')
 })
 
+console.log("[PrikolsHub/Runtime] Logging into Discord")
 client.login(process.env.TOKEN)
