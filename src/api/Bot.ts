@@ -97,12 +97,13 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
 	if ( interaction.user.id.toString() in Blacklist ) {
 		const reason: [string,string] = (Blacklist as any)[interaction.user.id.toString()]
 
-		// twitch ux be like this, so why not replicate it in prikolshub?
+		// Twitch's "Banned from ..." UX is poorly made, I guess. So remake it in PrikolsHub!
 
 		let embed: APIEmbed = {
-			title: ":warning: You are banned from PrikolsHub",
+			title: ":warning: You are banned.",
 			// top tier discord://-/users/1
-			description: `**${reason[0]}** is banned from using PrikolsHub unless unbanned by an administrator.\nYou can appeal by DMing the [owner]( <discord://-/users/${ (client as any).application?.owner?.owner?.id || (client as Client).application?.owner?.id }>) of this bot.`,
+			// intentionally being vague about how we ban (user id's) by lying to end user so they dont know
+			description: `**Banned using account descriptor.**\nYou are unable to use PrikolsHub until a moderator unbans you. You may be able to request an unban at https://ocbwoy3.dev/appeal or by DMing the [owner]( <discord://-/users/${ (client as any).application?.owner?.owner?.id || (client as Client).application?.owner?.id }>) of this bot.`,
 			color: 0xff0000,
 			fields: [
 				({name:"Reason",value:reason[1],inline:false} as APIEmbedField)
@@ -116,6 +117,10 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
 
 	if (!command) {
 		console.error(`[PrikolsHub/Bot:interactionHandler] No command matching "${interaction.commandName}" was found, something shady is going on!`);
+		await interaction.reply({
+			content: `[PrikolsHub.ts] Cannot find command in \`client.commands\`, something shady is going on!`,
+			ephemeral: true
+		})
 		return;
 	}
 

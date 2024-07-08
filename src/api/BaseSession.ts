@@ -9,7 +9,7 @@ export interface SessionData {
 	PlaceId: number,
 }
 
-export abstract class BaseSession implements SessionData {
+export class BaseSession implements SessionData {
 	public GameName: string = "<Uninitalized Session>"
 	public SessionRegion: string = "<Uninitalized Setup()>"
 	public ServerIPAddress: string = "<Uninitalized Session>"
@@ -49,7 +49,8 @@ export abstract class BaseSession implements SessionData {
 	/**
 	 * Accepts the session.
 	 */
-	public async AcceptSession(): Promise<void> {
+	public async AcceptSession(...anything:any): Promise<void> {
+		// HACK: Fix Target sig provides too few args by adding ...anything:any to base func!!!
 		this.SessionAccepted = true
 	}
 
