@@ -31,27 +31,7 @@ export class PrikolsHubRuntime {
 		}
 		return null;
 	}
-
-	public getSessionByJobIdSync(jobId:string): Session|null {
-		for (let i = 0; i < this.Sessions.length; i++) {
-			if (this.Sessions[i].JobId == jobId) {
-				return this.Sessions[i];
-			}
-		}
-		return null;
-	}
-
 	public async deleteSessionByJobId(jobId:string): Promise<void> {
-		for (let i=0; i < this.Sessions.length; i++) {
-			if (this.Sessions[i].JobId == jobId) {
-				delete this.Sessions.splice(i)[1];
-				console.log(`[PrikolsHub/Runtime] Deleted session "${jobId}"`)
-				console.log(this.Sessions)
-			}
-		}
-	}
-
-	public deleteSessionByJobIdSync(jobId:string): void {
 		for (let i=0; i < this.Sessions.length; i++) {
 			if (this.Sessions[i].JobId == jobId) {
 				delete this.Sessions.splice(i)[1];
@@ -70,20 +50,7 @@ export class PrikolsHubRuntime {
 		return null;
 	}
 
-	public getSessionByChannelIdSync(channelId:string): Session|null {
-		for (let i = 0; i < this.Sessions.length; i++) {
-			if (this.Sessions[i].channel?.id == channelId) {
-				return this.Sessions[i];
-			}
-		}
-		return null;
-	}
-
 	public async getSessions(): Promise<Session[]> {
-		return this.Sessions
-	}
-
-	public getSessionsSync(): Session[] {
 		return this.Sessions
 	}
 
@@ -119,7 +86,7 @@ export class PrikolsHubRuntime {
 
 		await new Promise(f => setTimeout(f, 10000));
 
-		await fs.rmSync(filepath)
+		fs.rmSync(filepath)
 	}
 
 }
