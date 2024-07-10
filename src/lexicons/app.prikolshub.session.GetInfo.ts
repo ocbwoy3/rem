@@ -18,7 +18,7 @@ const lexicon: LexiconDoc = {
 			},
 			output: {
 				encoding: 'application/json'
-			},
+			}
 		},
 	},
 }

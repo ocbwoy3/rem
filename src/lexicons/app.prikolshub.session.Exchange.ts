@@ -21,7 +21,7 @@ const lexicon: LexiconDoc = {
 			},
 			output: {
 				encoding: 'application/json'
-			},
+			}
 		}
 	}
 }
@@ -30,6 +30,17 @@ const runtime: PrikolsHubRuntime = (getGlobalRuntime() as PrikolsHubRuntime)
 
 async function method(ctx: XRPCContext) {
 	try {
+
+		const ci = (<unknown>ctx.input as any)
+		if (ci.secret != process.env.PRIKOLSHUB_SK) {
+			return {
+				encoding: 'application/json',
+				body: {
+					error: "UNAUTHORIZED"
+				}
+			}
+		};
+
 		const ses: Session|null = await runtime.getSessionByJobId(ctx.params.jobid as string)
 		if (!ses) {
 			return {
@@ -41,7 +52,7 @@ async function method(ctx: XRPCContext) {
 		}
 		return {
 			encoding: 'application/json',
-			body: await ses.ProcessRequest((<unknown>ctx.input as IncomingSessionMsgRequest))
+			body: await ses.ProcessRequest((ci as IncomingSessionMsgRequest))
 		}
 	} catch(e_) {
 		return {

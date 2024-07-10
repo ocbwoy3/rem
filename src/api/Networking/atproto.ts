@@ -16,7 +16,7 @@ export async function loadLexicons() {
 			const lexicon = require(filePath);
 		} catch(e_) {
 			console.error(e_)
-			console.warn(`[Networking/atproto:loadLexicons] Failed to load lexicon from file: ${filePath}`);
+			console.warn(`[PrikolsHub/LexiconRegistrate] Failed to load lexicon from file: ${filePath}`);
 		}
 	}
 }

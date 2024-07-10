@@ -48,11 +48,6 @@ client.on('ready',async()=>{
 	const userinfo = await setCookie(process.env.ROBLOSECURITY as string)
 	console.log(`[PrikolsHub/Roblox] Logged in using token as ${userinfo.UserName} (${userinfo.UserID})`)
 	await Runtime.setup()
-	console.log('wait')
-	await new Promise(f => setTimeout(f, 1000));
-	console.log('newses')
-	// 11195100561 is rfti
-	// 00000000-0000-0000-000000000000 valid
 	// await Runtime.createSession(11195100561,'d9b93c64-f1cd-41ce-ab05-7c33912fa688','128.116.63.71')
 	server.startApp()
 })

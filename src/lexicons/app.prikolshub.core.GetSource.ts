@@ -6,7 +6,7 @@ import { Session } from '../api/Session'
 
 const lexicon: LexiconDoc = {
 	lexicon: 1,
-	id: 'app.prikolshub.session.Create',
+	id: 'app.prikolshub.core.GetSource',
 	defs: {
 		main: {
 			type: 'procedure',
@@ -36,29 +36,22 @@ async function method(ctx: XRPCContext) {
 			return {
 				encoding: 'application/json',
 				body: {
-					error: "SESSION_EXISTS"
+					error: "SESSION_NOT_FOUND"
 				}
 			}
 		}
-
-		const ci = (<unknown>ctx.input as any)
-		if (ci.secret != process.env.PRIKOLSHUB_SK) {
-			return {
-				encoding: 'application/json',
-				body: {
-					error: "UNAUTHORIZED"
-				}
-			}
-		};
-
-		await runtime.createSession(ci.placeId,ci.jobId,ci.serverAddress)
 		return {
 			encoding: 'application/json',
 			body: {
-				status: "SUCCESS"
+				gameName: ses.GameName,
+				serverAddress: ses.ServerIPAddress,
+				serverRegion: ses.SessionRegion,
+				jobId: ses.JobId,
+				placeId: ses.PlaceId
 			}
 		}
 	} catch(e_) {
+		console.error(e_)
 		return {
 			encoding: 'application/json',
 			body: {
