@@ -24,7 +24,16 @@ export class PrikolsHubRuntime {
 	}
 	
 	public async getSessionByJobId(jobId:string): Promise<Session|null> {
-		for (let i=0; i < this.Sessions.length; i++) {
+		for (let i = 0; i < this.Sessions.length; i++) {
+			if (this.Sessions[i].JobId == jobId) {
+				return this.Sessions[i];
+			}
+		}
+		return null;
+	}
+
+	public getSessionByJobIdSync(jobId:string): Session|null {
+		for (let i = 0; i < this.Sessions.length; i++) {
 			if (this.Sessions[i].JobId == jobId) {
 				return this.Sessions[i];
 			}
@@ -35,15 +44,35 @@ export class PrikolsHubRuntime {
 	public async deleteSessionByJobId(jobId:string): Promise<void> {
 		for (let i=0; i < this.Sessions.length; i++) {
 			if (this.Sessions[i].JobId == jobId) {
-				delete this.Sessions[i];
-				console.log(`[PrikolsHub/Session] Deleted session "${jobId}"`)
+				delete this.Sessions.splice(i)[1];
+				console.log(`[PrikolsHub/Runtime] Deleted session "${jobId}"`)
+				console.log(this.Sessions)
 			}
 		}
 	}
 
-	public async getSessionByChannelId(channelId:number): Promise<Session|null> {
+	public deleteSessionByJobIdSync(jobId:string): void {
 		for (let i=0; i < this.Sessions.length; i++) {
-			if (this.Sessions[i].channelId == channelId) {
+			if (this.Sessions[i].JobId == jobId) {
+				delete this.Sessions.splice(i)[1];
+				console.log(`[PrikolsHub/Runtime] Deleted session "${jobId}"`)
+				console.log(this.Sessions)
+			}
+		}
+	}
+
+	public async getSessionByChannelId(channelId:string): Promise<Session|null> {
+		for (let i = 0; i < this.Sessions.length; i++) {
+			if (this.Sessions[i].channel?.id == channelId) {
+				return this.Sessions[i];
+			}
+		}
+		return null;
+	}
+
+	public getSessionByChannelIdSync(channelId:string): Session|null {
+		for (let i = 0; i < this.Sessions.length; i++) {
+			if (this.Sessions[i].channel?.id == channelId) {
 				return this.Sessions[i];
 			}
 		}
@@ -54,11 +83,15 @@ export class PrikolsHubRuntime {
 		return this.Sessions
 	}
 
+	public getSessionsSync(): Session[] {
+		return this.Sessions
+	}
+
 	public async createSession(placeId:number,jobId:string,ipAddress:string): Promise<void> {
 		const newSession = new Session(placeId,jobId,ipAddress)
 		await newSession.SetupSession()
 		this.Sessions.push(newSession)
-		console.log(`[PrikolsHub/Session] New session from "${newSession.GameName}" - ${newSession.PlaceId} (IP: ${newSession.ServerIPAddress})`)
+		console.log(`[PrikolsHub/Runtime] New session request from "${newSession.GameName}" - ${newSession.PlaceId} (IP: ${newSession.ServerIPAddress})`)
 
 		const accept_session = new ButtonBuilder()
 			.setCustomId(`accept_mksession|${jobId}`)
@@ -74,12 +107,12 @@ export class PrikolsHubRuntime {
 			.addComponents(accept_session, decline_session);
 
 		// download the thumbnail
-		const filepath = await downloadFile(newSession.thumbnailUrl,`${tmpdir()}/prikolshub-temp-${(new Date()).getMilliseconds().toString()}.png`)
+		const filepath = await downloadFile(newSession.thumbnailUrl,`${tmpdir()}/prikolshub-temp-${Date.now()}.png`)
 
 		await this.SessionRequestsChannel?.send({
 			content: `# [\`${newSession.GameName}\`]( <${newSession.gameUrl}> )
-			**JobId:** \`${jobId}\`
-			**lang.session_requests.server_ip:** \`${ipAddress}\``.replace(/\t/g,''),
+			**Job Id:** \`${jobId}\`
+			**Server IP:** \`${ipAddress}\``.replace(/\t/g,''),
 			components: ([row] as any),
 			files: [filepath]
 		})
@@ -89,4 +122,14 @@ export class PrikolsHubRuntime {
 		await fs.rmSync(filepath)
 	}
 
+}
+
+let runtime: PrikolsHubRuntime|null = null
+
+export function setGlobalRuntime(new_runtime:PrikolsHubRuntime): void {
+	runtime = new_runtime
+}
+
+export function getGlobalRuntime(): PrikolsHubRuntime|null {
+	return runtime
 }

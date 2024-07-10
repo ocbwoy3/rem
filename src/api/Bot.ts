@@ -18,7 +18,10 @@ import {
 	MessageCreateOptions,
 	ThreadChannel,
 	StartThreadOptions,
-	MessagePayload
+	MessagePayload,
+	Message,
+	DefaultWebSocketManagerOptions,
+	ActivityType
 } from "discord.js";
 import { CommandModuleExports } from "./Types";
 import * as fs from "node:fs";
@@ -30,13 +33,28 @@ import { downloadFile } from "./Utility";
 import { tmpdir } from "node:os";
 import { message } from "noblox.js";
 
+const intents = [
+	GatewayIntentBits.Guilds,
+	GatewayIntentBits.GuildMembers,
+	GatewayIntentBits.GuildMessages,
+	GatewayIntentBits.MessageContent
+]
+
+const { DefaultWebSocketManagerOptions: { identifyProperties }} = require("@discordjs/ws");
+
+identifyProperties.browser = "Discord iOS"; // trick for bot on mobile
+
 export const client: any = (new Client({
-	intents: [
-		GatewayIntentBits.Guilds,
-		GatewayIntentBits.GuildMessages,
-		GatewayIntentBits.GuildMembers,
-		GatewayIntentBits.MessageContent
-	]
+	intents: intents,
+	presence: {
+		status: 'dnd',
+		activities: [
+			{
+				name: "app.prikolshub.main",
+				type: ActivityType.Playing
+			}
+		]
+	}
 }) as Client)
 
 async function registerCommands() {
@@ -103,6 +121,29 @@ export function setExecutionContext(newContext: PrikolsHubRuntime | null): void 
 	executionContext = newContext
 }
 
+client.on(Events.MessageCreate, async(message: Message) => {
+	try {
+		// random attempts at debugging, realizing i forgot to set the channel in the session class after init
+		// console.log(`${message.member?.nickname || message.author.displayName} - ${message.content}`);
+		if (message.author.id.toString() in Blacklist) return;
+		if (message.webhookId) return;
+		const ses = await executionContext?.getSessionByChannelId(message.channelId)
+		// console.log('ses',ses);
+		if (!ses) return;
+		// console.log('membr',message.member)
+		const cont = message.content.trim().slice(0,2000)
+		if (cont.length > 2000) return; 
+		
+		await ses.queueMessage(
+			(message.author.displayName.slice(0,50) || "prikolshub_undefined_nickname"),
+			(message.member?.displayHexColor.slice(1) || "ff0000"),
+			cont
+		)
+	} catch(e_) {
+		console.error(e_)
+	}
+})
+
 client.on(Events.InteractionCreate, async (interaction: Interaction) => {
 	try {
 
@@ -141,15 +182,15 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
 				const forum: ForumChannel = (await client.channels.fetch(config.SessionForumChannelId) as ForumChannel);
 
 				// download the thumbnail
-				const filepath = await downloadFile(session.thumbnailUrl, `${tmpdir()}/prikolshub-temp-${(new Date()).getMilliseconds().toString()}.png`);
+				const filepath = await downloadFile(session.thumbnailUrl, `${tmpdir()}/prikolshub-temp-${Date.now()}.png`);
 
 				const thread: ThreadChannel = await forum.threads.create({
 					name: `${session.JobId.slice(0,5)} - ${session.GameName.slice(0,30)}`,
 					message: {
 						content: 
 							`# [\`${session.GameName}\`]( <${session.gameUrl}> )
-							**JobId:** \`${session.JobId}\`
-							**lang.session_requests.server_ip:** \`${session.ServerIPAddress}\``.replace(/\t/g,''),
+							**Job Id:** \`${session.JobId}\`
+							**Server IP:** \`${session.ServerIPAddress}\``.replace(/\t/g,''),
 						files: [filepath]
 					},
 					appliedTags: []
@@ -157,7 +198,7 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
 
 				await session.AcceptSession(thread);
 				await interaction.reply({ content: 'Accepted!', ephemeral: true });
-				await interaction.message.delete()
+				try {await interaction.message.delete()} catch {}
 
 				new Promise(async () => {
 					await new Promise(f => setTimeout(f, 10000));
@@ -173,7 +214,7 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
 				await executionContext?.deleteSessionByJobId(session.JobId)
 
 				await interaction.reply({ content: 'Declined', ephemeral: true });
-				await interaction.message.delete()
+				try {await interaction.message.delete()} catch {}
 
 				return;
 			}

@@ -9,9 +9,11 @@ configDotenv()
 import { client as djs_client, setExecutionContext } from "./api/Bot";
 import { Session } from "./api/Session";
 import { RobloxMessage } from "./api/Types";
-import { PrikolsHubRuntime } from "./api/PrikolsHubCore";
+import { PrikolsHubRuntime, setGlobalRuntime } from "./api/PrikolsHubCore";
 import { Client, Embed, TextChannel, APIEmbed, APIEmbedField, Channel } from "discord.js";
 import { setCookie } from "noblox.js";
+
+import * as server from "./api/Server"
 
 const client: Client = djs_client
 
@@ -19,6 +21,7 @@ console.log("[PrikolsHub/Runtime] Loading execution context")
 
 const Runtime = new PrikolsHubRuntime(client)
 setExecutionContext(Runtime)
+setGlobalRuntime(Runtime)
 
 if ( config.LogStartup == true) {
 	client.on('ready',async()=>{
@@ -49,7 +52,9 @@ client.on('ready',async()=>{
 	await new Promise(f => setTimeout(f, 1000));
 	console.log('newses')
 	// 11195100561 is rfti
-	await Runtime.createSession(11195100561,'00000000-0000-0000-000000000000','127.0.0.1')
+	// 00000000-0000-0000-000000000000 valid
+	// await Runtime.createSession(11195100561,'d9b93c64-f1cd-41ce-ab05-7c33912fa688','128.116.63.71')
+	server.startApp()
 })
 
 console.log("[PrikolsHub/Runtime] Logging into Discord")

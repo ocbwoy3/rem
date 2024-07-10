@@ -11,6 +11,8 @@ import checkDiskSpace from 'check-disk-space';
 import * as os from 'os';
 import * as fs from 'node:fs';
 import { exec } from "child_process";
+import { getLexicons, getMethods } from "../../api/Networking/LexiconRegistrate";
+import { cwd } from "process";
 
 function formatBytes(bytes: number, decimals = 2, noext:boolean=false): string {
     if (!+bytes) return '0 Baiti'
@@ -61,25 +63,39 @@ module.exports = {
 		const sicputemp = await si.cpuTemperature()
 
 		const diskusedroot = await checkDiskSpace('/') // LINUX ONLY
-		const lsblkoutput = await (new Promise(async(resolve)=>{
-			exec('lsblk',(e,stdout)=>{
-				resolve(stdout)
+
+		const uptimeoutput = await (new Promise(async(resolve)=>{
+			exec('uptime -p',(e,stdout)=>{
+				resolve(stdout.trim().replace(/\s/g,' ').trim().replace(/up /,''))
 			})
 		}))
 
-		const msg = `**User:** ${os.userInfo().username}@${os.hostname()}
+		const uptimeoutput_2 = await (new Promise(async(resolve)=>{
+			exec('uptime -s',(e,stdout)=>{
+				resolve(stdout.trim().replace(/\s/g,' ').trim())
+			})
+		}))
+
+		const msg = `# Device information
+		**User:** ${os.userInfo().username}@${os.hostname()}
+		**Uptime:** \`${uptimeoutput}, since ${uptimeoutput_2}\`
 		**OS:** ${osPrettyName}
-		**PID:** ${process.pid}
-		**CPU:** ${sicpu.cores}x ${sicpuspeed.avg} GHz ${sicpu.manufacturer} ${sicpu.brand} ${sicpu.model}
+		**CPU:** ${sicpu.cores}x ${sicpuspeed.avg}GHz ${sicpu.manufacturer} ${sicpu.brand} ${sicpu.model}
 		**CPU Temp:** ${sicputemp.main}°C
 		**System:** ${sisys.manufacturer} ${sisys.model}
 		**Memory (used/total):** ${formatBytes(simem.used,2,true)}/${formatBytes(simem.total,2,false)}
 		**Swap (used/total):** ${formatBytes(simem.swapused,2,true)}/${formatBytes(simem.swaptotal,2,false)}
 		**Disk \`/\` (used/total):** ${formatBytes(diskusedroot.size-diskusedroot.free,2,true)}/${formatBytes(diskusedroot.size,2,false)} 
 		
-		**\`lsblk\` output:**
+		# PrikolsHub.ts
+		**Version:** ${require("../../../package.json").version}
+		**Proccess ID:** ${process.pid}
+		**Working dir:** \`${cwd()}\`
+
+		# AT Protocol (atproto)
+		**Loaded Lexicons:** ${Object.keys(getMethods()).length}
 		\`\`\`
-		${lsblkoutput}
+		${Object.keys(getMethods()).join(', ')}
 		\`\`\`
 		
 		`.replace(/\t/g,'') // HACK
