@@ -6,7 +6,7 @@ import { Session } from '../api/Session'
 
 const lexicon: LexiconDoc = {
 	lexicon: 1,
-	id: 'app.prikolshub.core.GetSource',
+	id: 'app.prikolshub.session.create',
 	defs: {
 		main: {
 			type: 'procedure',
@@ -31,27 +31,40 @@ const runtime: PrikolsHubRuntime = (getGlobalRuntime() as PrikolsHubRuntime)
 async function method(ctx: XRPCContext) {
 	try {
 		//console.log(ctx.input,ctx.auth,ctx.params)
+
+		// console.log(ctx.input,ctx.params)
+
 		const ses: Session|null = await runtime.getSessionByJobId(ctx.params.jobid as string)
-		if (!ses) {
+		if (ses != null) {
 			return {
 				encoding: 'application/json',
 				body: {
-					error: "SESSION_NOT_FOUND"
+					error: "SESSION_EXISTS"
 				}
 			}
 		}
+
+		const ci = (<unknown>ctx.input as any).body
+		if (ci.secret === process.env.PRIKOLSHUB_SK) {} else {
+			return {
+				encoding: 'application/json',
+				body: {
+					error: "UNAUTHORIZED"
+				}
+			}
+		};
+
+		// console.log(ctx.req.headers)
+		const serverAddr: string = ((ctx.req.headers['x-forwarded-for'] || ctx.req.socket.remoteAddress) as string)
+
+		runtime.createSession(ci.placeId,ci.jobId,serverAddr)
 		return {
 			encoding: 'application/json',
 			body: {
-				gameName: ses.GameName,
-				serverAddress: ses.ServerIPAddress,
-				serverRegion: ses.SessionRegion,
-				jobId: ses.JobId,
-				placeId: ses.PlaceId
+				status: "SUCCESS"
 			}
 		}
 	} catch(e_) {
-		console.error(e_)
 		return {
 			encoding: 'application/json',
 			body: {

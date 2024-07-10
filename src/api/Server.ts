@@ -12,7 +12,7 @@ export function startApp() {
 
 	const xrpc_server = makeServer()
 	app.use(xrpc_server.router)
-	
+
 	app.listen(PORT,async()=>{
 		console.log(`[PrikolsHub/Server] Started express server at http://127.0.0.1:${PORT}`)
 	})

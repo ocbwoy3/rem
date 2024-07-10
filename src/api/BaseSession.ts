@@ -68,7 +68,7 @@ export class BaseSession implements SessionData {
 	public async AcceptSession(...anything:any): Promise<void> {
 		// HACK: Fix Target sig provides too few args by adding ...anything:any to base func!!!
 		// TODO: Figure out an alternative in prod
-		console.log(`[PrikolsHub/Session] (${this.JobId.slice(0,5)}) Session Accepted - ${this.GameName}`)
+		console.log(`[PrikolsHub/Chat] (${this.JobId.slice(0,5)}) Session Accepted - ${this.GameName}`)
 		this.SessionAccepted = true
 	}
 
@@ -76,8 +76,8 @@ export class BaseSession implements SessionData {
 	 * Processes a message.
 	 * @param msg The message to process.
 	 */
-	private async processMessage(msg: RobloxMessage): Promise<void> {
-		console.log(`[PrikolsHub/BaseSession] R[${this.JobId.slice(0,5)}] <${msg[0]}> ${msg[2]}`)
+	protected async processMessage(msg: RobloxMessage): Promise<void> {
+		console.log(`[PrikolsHub/Chat] R[${this.JobId.slice(0,5)}] <${msg[0].replace(/ \(@(.*)/giu,'')}> ${msg[2]}`)
 	}
 
 	/**
@@ -92,7 +92,9 @@ export class BaseSession implements SessionData {
 			} as IncomingSessionMsgRequestResponse)
 		}
 
-		const dat = Object.assign({},this.QueuedDiscordMessages)
+		const dat = Object.assign([],this.QueuedDiscordMessages)
+		this.QueuedDiscordMessages = [] // HACK
+
 		for (let i=0; i<data.messages.length; i++) {
 			new Promise(async()=>{
 				this.processMessage(data.messages[i])
@@ -110,7 +112,7 @@ export class BaseSession implements SessionData {
 	 * @param messageContent The message's content
 	 */
 	public async queueMessage(displayName:string,nameColor:string,messageContent:string): Promise<void> {
-		console.log(`[PrikolsHub/Session] D[${this.JobId.slice(0,5)}] <${displayName}> ${messageContent.slice(0,500)}`)
+		console.log(`[PrikolsHub/Chat] D[${this.JobId.slice(0,5)}] <${displayName}> ${messageContent.slice(0,500)}`)
 		this.QueuedDiscordMessages.push([displayName,nameColor,messageContent.slice(0,500)])
 	}
 
@@ -127,7 +129,7 @@ export class BaseSession implements SessionData {
 	 * @param messageContent The message to queue
 	 */
 	public async queueSystemMessage(messageContent:string): Promise<void> {
-		console.log(`[PrikolsHub/Session] S[${this.JobId.slice(0,5)}] <PrikolsHub> ${messageContent.slice(0,500)}`)
+		console.log(`[PrikolsHub/Chat] S[${this.JobId.slice(0,5)}] <PrikolsHub> ${messageContent.slice(0,500)}`)
 		this.QueuedDiscordMessages.push(["PrikolsHub","ff0000",messageContent])
 	}
 

@@ -211,7 +211,7 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
 				let session: Session | null | undefined = await executionContext?.getSessionByJobId(customid.split('|')[1]);
 				if (!session) return;
 
-				await executionContext?.deleteSessionByJobId(session.JobId)
+				executionContext?.deleteSessionByJobId(session.JobId)
 
 				await interaction.reply({ content: 'Declined', ephemeral: true });
 				try {await interaction.message.delete()} catch {}

@@ -1,16 +1,30 @@
 import { Channel, ForumChannel, ThreadChannel, ThreadOnlyChannel, Webhook } from "discord.js";
 import { BaseSession } from "./BaseSession";
 import * as config from "../../config.json";
+import { RobloxMessage } from "./Types";
 
 export interface DiscordSessionData {
 	channel?: ThreadChannel
-	webhook?: Webhook
 	channelId: string
 }
 
 export class Session extends BaseSession implements DiscordSessionData {
 	public channelId: string = "-2";
 	public channel?: ThreadChannel
+	private webhook?: Webhook
+
+	protected async processMessage(msg: RobloxMessage): Promise<void> {
+
+		try {
+			this.webhook?.send({
+				threadId: this.channel?.id,
+				username: msg[0],
+				content: msg[2].slice(0,500)
+			})
+		} catch(e_) { console.error(e_) }
+
+		super.processMessage(msg)
+	}
 
 	public async AcceptSession(forumThread:ThreadChannel): Promise<void> {
 		this.channel = forumThread;
@@ -22,6 +36,8 @@ export class Session extends BaseSession implements DiscordSessionData {
 			name: `PrikolsHub_${Date.now()}`,
 			reason: `${this.GameName}`
 		})
+
+		this.webhook = webhook
 
 		await webhook.send({
 			threadId: forumThread.id,

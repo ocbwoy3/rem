@@ -1,12 +1,12 @@
 import { LexiconDoc } from '@atproto/lexicon'
-import { XRPCContext } from '../api/Types'
+import { IncomingSessionMsgRequest, XRPCContext } from '../api/Types'
 import { registerLexicon } from '../api/Networking/LexiconRegistrate'
 import { PrikolsHubRuntime, getGlobalRuntime } from '../api/PrikolsHubCore'
-import { Session } from '../api/Session'
+import { Session } from '../api/Session';
 
 const lexicon: LexiconDoc = {
 	lexicon: 1,
-	id: 'app.prikolshub.session.Create',
+	id: 'app.prikolshub.session.exchange',
 	defs: {
 		main: {
 			type: 'procedure',
@@ -22,27 +22,17 @@ const lexicon: LexiconDoc = {
 			output: {
 				encoding: 'application/json'
 			}
-		},
-	},
+		}
+	}
 }
 
 const runtime: PrikolsHubRuntime = (getGlobalRuntime() as PrikolsHubRuntime)
 
 async function method(ctx: XRPCContext) {
 	try {
-		//console.log(ctx.input,ctx.auth,ctx.params)
-		const ses: Session|null = await runtime.getSessionByJobId(ctx.params.jobid as string)
-		if (!ses) {
-			return {
-				encoding: 'application/json',
-				body: {
-					error: "SESSION_EXISTS"
-				}
-			}
-		}
 
-		const ci = (<unknown>ctx.input as any)
-		if (ci.secret != process.env.PRIKOLSHUB_SK) {
+		const ci = (<unknown>ctx.input as any).body
+		if (ci.secret === process.env.PRIKOLSHUB_SK) {} else {
 			return {
 				encoding: 'application/json',
 				body: {
@@ -51,12 +41,18 @@ async function method(ctx: XRPCContext) {
 			}
 		};
 
-		await runtime.createSession(ci.placeId,ci.jobId,ci.serverAddress)
+		const ses: Session|null = await runtime.getSessionByJobId(ctx.params.jobid as string)
+		if (!ses) {
+			return {
+				encoding: 'application/json',
+				body: {
+					error: "SESSION_NOT_FOUND"
+				}
+			}
+		}
 		return {
 			encoding: 'application/json',
-			body: {
-				status: "SUCCESS"
-			}
+			body: await ses.ProcessRequest((ci as IncomingSessionMsgRequest))
 		}
 	} catch(e_) {
 		return {
