@@ -1,7 +1,8 @@
-import { Channel, ForumChannel, ThreadChannel, ThreadOnlyChannel, Webhook } from "discord.js";
+import { APIEmbed, ActionRowBuilder, ButtonBuilder, ButtonStyle, Channel, ComponentType, ForumChannel, Interaction, ThreadChannel, ThreadOnlyChannel, Webhook } from "discord.js";
 import { BaseSession } from "./BaseSession";
 import * as config from "../../config.json";
 import { RobloxMessage } from "./Types";
+import { getProfilePicture } from "./Utility";
 
 export interface DiscordSessionData {
 	channel?: ThreadChannel
@@ -13,13 +14,95 @@ export class Session extends BaseSession implements DiscordSessionData {
 	public channel?: ThreadChannel
 	private webhook?: Webhook
 
+	public async EndSession(): Promise<void> {
+		await this.webhook?.delete("session ended")
+		await super.EndSession()
+
+		new Promise(async()=>{
+			// buttons
+
+			const keepsesbtn_d = `prikolshubtemp-${Date.now()}-keep`
+			const delsesbtn_d = `prikolshubtemp-${Date.now()}-delete`
+			
+			const keepButton = new ButtonBuilder()
+				.setLabel('Keep')
+				.setStyle(ButtonStyle.Primary)
+				.setCustomId(keepsesbtn_d)
+
+			const deleteButton = new ButtonBuilder()
+				.setLabel('Delete')
+				.setStyle(ButtonStyle.Danger)
+				.setCustomId(delsesbtn_d)
+
+			const row = new ActionRowBuilder()
+				.addComponents(keepButton, deleteButton);
+
+			let embed: APIEmbed = {
+				title: "Session Ended",
+				// top tier discord://-/users/1
+				// intentionally being vague about how we ban (user id's) by lying to end user so they dont know
+				description: `This session has been closed by a user. You may choose to keep or end the session. It will automatically be kept if no user action was received for 60 seconds.`,
+				color: 0x00ffff
+			}
+
+			const reply = await this.channel?.send({
+				embeds: [embed],
+				components: ([row] as any)
+			})
+
+			const collector = reply?.createMessageComponentCollector({
+				componentType: ComponentType.Button,
+				time: 60_000
+			})
+
+			collector?.on('collect', async (interaction: Interaction) => {
+				try {
+
+					if (interaction.isAutocomplete()) return;
+
+					const customid = ((interaction as any).customId as string)
+					if (customid == keepsesbtn_d) {
+						collector.stop()
+						await interaction.reply({ content: 'Keeping session' })
+						keepButton.setDisabled(true)
+						deleteButton.setDisabled(true)
+						await reply?.edit({
+							components: ([row] as any)
+						})
+						return;
+					}
+					if (customid == delsesbtn_d) {
+						collector.stop()
+						await interaction.reply({ content: 'Deleting session' })
+						this.channel?.delete()
+						return
+					}
+
+				} catch {}
+			})
+
+			collector?.on('end', async() => {
+				try {
+					keepButton.setDisabled(true)
+					deleteButton.setDisabled(true)
+					await reply?.edit({
+						components: ([row] as any)
+					})
+				} catch {}
+			})
+
+		})
+
+	}
+
 	protected async processMessage(msg: RobloxMessage): Promise<void> {
 
 		try {
 			this.webhook?.send({
 				threadId: this.channel?.id,
 				username: msg[0],
-				content: msg[2].slice(0,500)
+				content: msg[2].slice(0,500),
+				avatarURL: await getProfilePicture(msg[1].toString())
 			})
 		} catch(e_) { console.error(e_) }
 

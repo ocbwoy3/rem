@@ -1,6 +1,6 @@
 import { LexiconDoc } from '@atproto/lexicon'
 import { IncomingSessionMsgRequest, XRPCContext } from '../api/Types'
-import { registerLexicon } from '../api/Networking/LexiconRegistrate'
+import { registerLexicon } from '../api/atproto/LexiconRegistrate'
 import { PrikolsHubRuntime, getGlobalRuntime } from '../api/PrikolsHubCore'
 import { Session } from '../api/Session';
 

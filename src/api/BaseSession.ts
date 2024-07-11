@@ -1,6 +1,7 @@
 import { PlaceInformation, ThumbnailRequest, getPlaceInfo, getThumbnails } from "noblox.js";
 import * as noblox from "noblox.js";
 import { IncomingSessionMsgRequest, IncomingSessionMsgRequestResponse, QueuedDiscordMessage, RobloxMessage, SessionPlayer } from "./Types"
+import { PrikolsHubRuntime, getGlobalRuntime } from "./PrikolsHubCore";
 
 export interface SessionData {
 	GameName: string,
@@ -70,6 +71,15 @@ export class BaseSession implements SessionData {
 		// TODO: Figure out an alternative in prod
 		console.log(`[PrikolsHub/Chat] (${this.JobId.slice(0,5)}) Session Accepted - ${this.GameName}`)
 		this.SessionAccepted = true
+	}
+
+	/**
+	 * Ends the session.
+	 */
+	protected async EndSession(...anything:any): Promise<void> {
+		this.SessionAccepted = false
+		const runtime: PrikolsHubRuntime = (getGlobalRuntime() as PrikolsHubRuntime)
+		await runtime.deleteSessionByJobId(this.JobId)
 	}
 
 	/**

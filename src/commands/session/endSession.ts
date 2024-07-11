@@ -6,7 +6,10 @@ import {
 	Client,
 	APIEmbed
 } from "discord.js";
+import { PrikolsHubRuntime, getGlobalRuntime } from "../../api/PrikolsHubCore";
+import { Session } from "../../api/Session";
 
+const runtime: PrikolsHubRuntime = (getGlobalRuntime() as PrikolsHubRuntime)
 
 module.exports = {
 	gdpr: true,
@@ -21,6 +24,11 @@ module.exports = {
 			description: `Attempting to end the session.`,
 			color: 0x0000ff
 		}
-		await interaction.reply({ embeds: [embed], ephemeral: true })
+
+		const ses: Session = (await runtime.getSessionByChannelId(interaction.channelId) as any)
+		
+		interaction.reply({ embeds: [embed], ephemeral: true })
+
+		ses.EndSession()
 	},
 };

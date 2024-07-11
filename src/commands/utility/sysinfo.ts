@@ -11,7 +11,7 @@ import checkDiskSpace from 'check-disk-space';
 import * as os from 'os';
 import * as fs from 'node:fs';
 import { exec } from "child_process";
-import { getLexicons, getMethods } from "../../api/Networking/LexiconRegistrate";
+import { getLexicons, getMethods } from "../../api/atproto/LexiconRegistrate";
 import { cwd } from "process";
 
 function formatBytes(bytes: number, decimals = 2, noext:boolean=false): string {

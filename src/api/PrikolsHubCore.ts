@@ -36,7 +36,7 @@ export class PrikolsHubRuntime {
 			if (this.Sessions[i].JobId == jobId) {
 				delete this.Sessions.splice(i,1)[1];
 				console.log(`[PrikolsHub/Runtime] Deleted session "${jobId}"`)
-				console.log(this.Sessions)
+				// console.log(this.Sessions)
 			}
 		}
 	}
