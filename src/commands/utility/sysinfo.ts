@@ -15,11 +15,11 @@ import { getLexicons, getMethods } from "../../api/atproto/LexiconRegistrate";
 import { cwd } from "process";
 
 function formatBytes(bytes: number, decimals = 2, noext:boolean=false): string {
-    if (!+bytes) return '0 Baiti'
+    if (!+bytes) return '0 Bytes'
 
     const k = 1024
     const dm = decimals < 0 ? 0 : decimals
-    const sizes = ['Baiti', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']
+    const sizes = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']
 
     const i = Math.floor(Math.log(bytes) / Math.log(k))
 
@@ -31,6 +31,12 @@ module.exports = {
 	.setName('sysinfo')
 	.setDescription('Provides information about the device PrikolsHub is running on.'),
 	async execute(interaction: CommandInteraction) {
+
+		if (os.type()!='Windows_NT') {
+			await interaction.reply({ephemeral:true,content:"This command is only supported on UNIX-Based Operating Systems like Linux and macOS."})
+			return;
+		}
+
 		await interaction.deferReply(({ephemeral: false,fetchReply: false} as InteractionDeferReplyOptions))
 
 		// resolve owner
@@ -43,18 +49,20 @@ module.exports = {
 			return
 		}
 
-		let osrel = fs.readFileSync('/etc/os-release', 'utf-8')
 		let opj: {[a: string]: string} = {}
+		try {
+			let osrel = fs.readFileSync('/etc/os-release', 'utf-8')
+			
+			osrel?.split('\n')?.forEach((line, index) => {
+				let words = line?.split('=')
+				let key = words[0]?.toLowerCase()
+				if (key === '') return
+				let value = words[1]?.replace(/"/g,'')
+				opj[key] = value
+			})
+		} catch {}
 		
-		osrel?.split('\n')?.forEach((line, index) => {
-			let words = line?.split('=')
-			let key = words[0]?.toLowerCase()
-			if (key === '') return
-			let value = words[1]?.replace(/"/g,'')
-			opj[key] = value
-		})
-		
-		let osPrettyName = `${opj.pretty_name || opj.name || "Unknown"} ${os.arch}`
+		let osPrettyName = `${opj.pretty_name || opj.name || "Unknown, likely Windows"} ${os.arch}`
 
 		const simem = await si.mem()
 		const sisys = await si.system()
@@ -62,19 +70,24 @@ module.exports = {
 		const sicpuspeed = await si.cpuCurrentSpeed()
 		const sicputemp = await si.cpuTemperature()
 
-		const diskusedroot = await checkDiskSpace('/') // LINUX ONLY
+		const diskusedroot = await checkDiskSpace(os.type()=='Windows_NT' ? 'C:\\' : "/") // LINUX ONLY
 
-		const uptimeoutput = await (new Promise(async(resolve)=>{
-			exec('uptime -p',(e,stdout)=>{
-				resolve(stdout.trim().replace(/\s/g,' ').trim().replace(/up /,''))
-			})
-		}))
+		let uptimeoutput = "error"
+		let uptimeoutput_2 = "error"
 
-		const uptimeoutput_2 = await (new Promise(async(resolve)=>{
-			exec('uptime -s',(e,stdout)=>{
-				resolve(stdout.trim().replace(/\s/g,' ').trim())
-			})
-		}))
+		if (os.type()!='Windows_NT') {
+			uptimeoutput = await (new Promise(async(resolve)=>{
+				exec('uptime -p',(e,stdout)=>{
+					resolve(stdout.trim().replace(/\s/g,' ').trim().replace(/up /,''))
+				})
+			}))
+	
+			uptimeoutput_2 = await (new Promise(async(resolve)=>{
+				exec('uptime -s',(e,stdout)=>{
+					resolve(stdout.trim().replace(/\s/g,' ').trim())
+				})
+			}))
+		}
 
 		const msg = `# Device information
 		**User:** ${os.userInfo().username}@${os.hostname()}
@@ -83,9 +96,9 @@ module.exports = {
 		**CPU:** ${sicpu.cores}x ${sicpuspeed.avg}GHz ${sicpu.manufacturer} ${sicpu.brand} ${sicpu.model}
 		**CPU Temp:** ${sicputemp.main}°C
 		**System:** ${sisys.manufacturer} ${sisys.model}
-		**Memory (used/total):** ${formatBytes(simem.used,2,true)}/${formatBytes(simem.total,2,false)}
-		**Swap (used/total):** ${formatBytes(simem.swapused,2,true)}/${formatBytes(simem.swaptotal,2,false)}
-		**Disk \`/\` (used/total):** ${formatBytes(diskusedroot.size-diskusedroot.free,2,true)}/${formatBytes(diskusedroot.size,2,false)} 
+		**Memory (used/total):** ${formatBytes(simem.used,2)} of ${formatBytes(simem.total,2)}
+		**Swap (used/total):** ${formatBytes(simem.swapused,2)} of ${formatBytes(simem.swaptotal,2)}
+		**Disk \`${os.type()=='Windows_NT' ? 'C:\\' : "/"}\` (used/total):** ${formatBytes(diskusedroot.size-diskusedroot.free,2)} of ${formatBytes(diskusedroot.size,2)} 
 		
 		# PrikolsHub.ts
 		**Version:** ${require("../../../package.json").version}
@@ -99,11 +112,6 @@ module.exports = {
 		\`\`\`
 		
 		`.replace(/\t/g,'') // HACK
-
-		const wtf =
-			`# \`${os.userInfo().username}@${os.hostname()}\`\n`+
-			`${osPrettyName}\n\n`+
-			`**NodeJS PID:** ${process.pid}`
 		
 		await interaction.followUp(msg);
 	},

@@ -4,7 +4,8 @@
   "description": "The PrikolsHub remote admin.",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "clear && trap \"rm -r dist\" EXIT && tsc && node --no-deprecation dist/src/index.js",
+    "dev": "trap \"rm -r dist\" EXIT && tsc && clear && node --no-deprecation dist/src/index.js",
+    "dev_windows": "del /Q dist && npx tsc && cls && node --no-deprecation dist/src/index.js",
     "build": "tsc",
     "start": "node --no-deprecation dist/src/index.js"
   },
@@ -19,6 +20,7 @@
   },
   "homepage": "https://github.com/ocbwoy3/PrikolsHub.ts#readme",
   "dependencies": {
+    "@atproto/identity": "^0.4.0",
     "@atproto/xrpc-server": "^0.5.2",
     "@fastify/middie": "^8.3.1",
     "@fastify/static": "^7.0.4",
@@ -26,6 +28,7 @@
     "@sapphire/discord.js-utilities": "^7.3.0",
     "@sapphire/framework": "^5.2.1",
     "@sapphire/time-utilities": "^1.7.12",
+    "atproto": "^0.0.1",
     "axios": "^1.7.2",
     "check-disk-space": "^3.4.0",
     "discord.js": "14.x",

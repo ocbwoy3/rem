@@ -1,6 +1,6 @@
 import express from "express";
 import * as swagger from "swagger-ui-express";
-import { loadLexicons, makeServer } from "./atproto/atproto";
+import { loadLexicons, makeServer } from "./atproto/XRPCServer";
 const PORT = process.env.PORT || 2929;
 
 export const app = express()

@@ -55,7 +55,9 @@ async function method(ctx: XRPCContext) {
 		};
 
 		// console.log(ctx.req.headers)
-		const serverAddr: string = ((ctx.req.headers['x-forwarded-for'] || ctx.req.socket.remoteAddress) as string)
+
+		// TODO: Remove 127.0.0.1
+		const serverAddr: string = "127.0.0.1" //((ctx.req.headers['x-forwarded-for'] || ctx.req.socket.remoteAddress) as string)
 
 		runtime.createSession(ci.placeId,ci.jobId,serverAddr)
 		return {
