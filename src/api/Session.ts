@@ -122,11 +122,11 @@ export class Session extends BaseSession implements DiscordSessionData {
 
 		this.webhook = webhook
 
-		await webhook.send({
-			threadId: forumThread.id,
-			username: "PrikolsHub Testing!!!!!",
-			content: "prikolshub testing!!!!!!!"
-		})
+		// await webhook.send({
+		// 	threadId: forumThread.id,
+		// 	username: "PrikolsHub Testing!!!!!",
+		// 	content: "prikolshub testing!!!!!!!"
+		// })
 
 		// some housekeeping here or something
 		super.AcceptSession() // TODO: Use an alternative for prod

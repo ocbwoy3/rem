@@ -1,5 +1,6 @@
 import { DidResolver, HandleResolver } from "@atproto/identity";
 
+
 const didres = new DidResolver({})
 const hdlres = new HandleResolver({})
 
@@ -23,3 +24,5 @@ export async function resolveHandleToDid(handle:string): Promise<string|null> {
 	return did
 
 }
+
+console.warn(`[PrikolsHub/atproto] Loaded DID Handle resolver`);

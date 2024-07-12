@@ -28,6 +28,8 @@
     "@sapphire/discord.js-utilities": "^7.3.0",
     "@sapphire/framework": "^5.2.1",
     "@sapphire/time-utilities": "^1.7.12",
+    "@sentry/node": "^8.17.0",
+    "@sentry/profiling-node": "^8.17.0",
     "atproto": "^0.0.1",
     "axios": "^1.7.2",
     "check-disk-space": "^3.4.0",

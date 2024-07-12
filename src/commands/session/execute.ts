@@ -5,7 +5,8 @@ import {
 	InteractionDeferReplyOptions,
 	Client,
 	APIEmbed,
-	SlashCommandStringOption
+	SlashCommandStringOption,
+	CommandInteractionOption
 } from "discord.js";
 import { PrikolsHubRuntime, getGlobalRuntime } from "../../api/PrikolsHubCore";
 import { Session } from "../../api/Session";
@@ -16,7 +17,7 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('execute')
 		.setDescription('Executes code on the server')
-		.addStringOption(builder=>builder.setName("code").setDescription("The code to execute on the server.")),
+		.addStringOption(builder=>builder.setName("code").setDescription("The code to execute on the server.").setRequired(true)),
 	async execute(interaction: CommandInteraction) {
 
 		let not_session_embed: APIEmbed = {
@@ -40,8 +41,9 @@ module.exports = {
 
 		await interaction.reply({ embeds: [embed], ephemeral: true })
 		
+		const code: string = (interaction.options.get('code')?.value as string)
 		
-		ses.queueCommands("execute",[])
+		ses.queueCommands("execute",[code])
 
 	},
 };
