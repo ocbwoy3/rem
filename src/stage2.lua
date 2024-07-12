@@ -1,0 +1,1 @@
+error('PrikolsHub FOREVER!!!!!!!!',0)

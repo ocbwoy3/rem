@@ -32,8 +32,8 @@ module.exports = {
 	.setDescription('Provides information about the device PrikolsHub is running on.'),
 	async execute(interaction: CommandInteraction) {
 
-		if (os.type()!='Windows_NT') {
-			await interaction.reply({ephemeral:true,content:"This command is only supported on UNIX-Based Operating Systems like Linux and macOS."})
+		if (os.type()!='Linux') {
+			await interaction.reply({ephemeral:true,content:"This command is only supported on Linux."})
 			return;
 		}
 

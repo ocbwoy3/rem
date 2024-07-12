@@ -1,7 +1,9 @@
 import { configDotenv } from "dotenv";
 configDotenv()
 
-import "./api/instrument"; // Load Sentry
+// Load Sentry
+import * as Sentry from "@sentry/node";
+import "./api/instrument";
 
 import { version } from "../package.json";
 import * as config from "../config.json";
@@ -60,7 +62,7 @@ let isKilling = false
 
 signals.forEach((signal:string)=>{
 	process.on(signal,async()=>{
-		if (signal=="SIGINT") {console.log("\b\b")}
+		if (signal=="SIGINT") {process.stdout.write('\b\b')}
 		if (isKilling) return;
 		isKilling = true;
 		if (signal == "SIGINT") {
@@ -84,7 +86,6 @@ signals.forEach((signal:string)=>{
 				await new Promise(resolve=>setTimeout(resolve,1000))
 			}
 		} catch {}
-		await new Promise(resolve=>setTimeout(resolve,5000))
 		process.exit(0)
 	})
 })

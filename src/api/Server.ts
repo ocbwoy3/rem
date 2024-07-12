@@ -9,9 +9,11 @@ export const app = express()
 console.log(`[PrikolsHub/Sentry] Set up Express error handler.`)
 Sentry.setupExpressErrorHandler(app)
 
+/*
 app.get("/debug-sentry", function mainHandler(req, res) {
 	throw new Error("My first Sentry error!");
 });
+*/
 
 export function startApp() {
 	
