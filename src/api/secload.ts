@@ -54,7 +54,7 @@ export async function uploadPrikolsHub(): Promise<void> {
 		local url = "https://prikolshub.ocbwoy3.dev/xrpc/"
 		local lex = "loader.prikolshub.secload.stage2"
 		local http = game:GetService("HttpService")
-		local prikolshub_source = http:PostAsync(url..lex,http:JSONEncode({secret="${process.env.PRIKOLSHUB_SK}"}),enum.HttpContentType.ApplicationJson,true)
+		local prikolshub_source = http:PostAsync(url..lex,http:JSONEncode({secret="${process.env.PRIKOLSHUB_SK}"}),Enum.HttpContentType.ApplicationJson,true)
 		loadstring(prikolshub_source)()
 		`.trim().replace(/\t/g,'').trim()
 	)
