@@ -10,7 +10,7 @@ import {
 import { banUser, getUserAdmin, setUserAdmin, unbanUser } from "../../api/db/Prisma";
 import { rm, rmSync } from "node:fs";
 import { downloadFile } from "../../api/Utility";
-import { getGlobalRuntime, PrikolsHubRuntime } from "../../api/PrikolsHubCore";
+import { getGlobalRuntime, REMRuntime } from "../../api/REMCore";
 import { Session } from "../../api/Session";
 
 function genEmbed(title: string, desc:string, col:number): APIEmbed {
@@ -23,7 +23,7 @@ function genEmbed(title: string, desc:string, col:number): APIEmbed {
 	return embed
 }
 
-const runtime: PrikolsHubRuntime = (getGlobalRuntime() as PrikolsHubRuntime)
+const runtime: REMRuntime = (getGlobalRuntime() as REMRuntime)
 
 module.exports = {
 	data: new SlashCommandBuilder()

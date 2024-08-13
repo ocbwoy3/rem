@@ -26,7 +26,7 @@ import {
 import { CommandModuleExports } from "./Types";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { PrikolsHubRuntime } from "./PrikolsHubCore";
+import { REMRuntime } from "./REMCore";
 import { Blacklist } from "../../config.json";
 import { Session } from "./Session";
 import { downloadFile } from "./Utility";
@@ -116,9 +116,9 @@ client.on('ready', async () => {
 	console.log(`[REM/Bot:onReady] Bot successfully loaded!`)
 });
 
-var executionContext: PrikolsHubRuntime | null = null;
+var executionContext: REMRuntime | null = null;
 
-export function setExecutionContext(newContext: PrikolsHubRuntime | null): void {
+export function setExecutionContext(newContext: REMRuntime | null): void {
 	executionContext = newContext
 }
 

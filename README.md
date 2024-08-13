@@ -6,6 +6,6 @@ The PrikolsHub Killer.
 
 ## How to get started
 
-Install the necessary packages, rename `.env.example` to `.env`, configure Token, App ID and everything else, configure channels and bans in `config.json`. Run `npx prisma migrate dev --name init` to init prisma db.
+Install the necessary packages, rename `.env.example` to `.env`, configure Token, App ID and everything else, configure channels and bans in `config.json`. Run `npx prisma migrate dev` to init prisma db.
 
 Do `npm run build` and `npm run start` to start REM. Using `npm run dev` is also an option.

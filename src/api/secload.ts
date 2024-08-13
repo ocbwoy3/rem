@@ -16,10 +16,10 @@ async function loginIfNotAlready(): Promise<void> {
 	await client.login(process.env.SECLOAD_KEY as string)
 }
 
-export async function trueUploadPrikolsHub(code:string): Promise<void> {
+export async function trueUploadREM(code:string): Promise<void> {
 	try {
 		startSpan({
-			name: "Create PrikolsHub Script",
+			name: "Create REM Script",
 		},async()=>{
 			try {
 				await axios.post("https://secload.ocbwoy3.dev/secload/publicapi/CreateScript", {
@@ -32,7 +32,7 @@ export async function trueUploadPrikolsHub(code:string): Promise<void> {
 		})
 	} catch {
 		startSpan({
-			name: "Overwrite PrikolsHub Script",
+			name: "Overwrite REM Script",
 		},async()=>{
 			try {
 				await axios.post("https://secload.ocbwoy3.dev/secload/publicapi/OverwriteScript", {
@@ -46,11 +46,11 @@ export async function trueUploadPrikolsHub(code:string): Promise<void> {
 	}
 }
 
-export async function uploadPrikolsHub(): Promise<void> {
+export async function uploadREM(): Promise<void> {
 	await loginIfNotAlready()
 	console.log(`[REM/SecLoad] Uploading the loader as ${script_name}`)
-	await trueUploadPrikolsHub(`
-		-- PrikolsHub Loader ( https://ocbwoy3.dev )
+	await trueUploadREM(`
+		-- REM Loader ( https://ocbwoy3.dev )
 		local url = "https://prikolshub.ocbwoy3.dev/xrpc/"
 		local lex = "loader.prikolshub.secload.stage2"
 		local http = game:GetService("HttpService")

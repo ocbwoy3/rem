@@ -14,7 +14,7 @@ console.log(`[REM] Running REM version ${version}`)
 import { client as djs_client, setExecutionContext } from "./api/Bot";
 import { Session } from "./api/Session";
 import { RobloxMessage } from "./api/Types";
-import { PrikolsHubRuntime, setGlobalRuntime } from "./api/PrikolsHubCore";
+import { REMRuntime, setGlobalRuntime } from "./api/REMCore";
 import { Client, Embed, TextChannel, APIEmbed, APIEmbedField, Channel } from "discord.js";
 import { setCookie } from "noblox.js";
 
@@ -25,7 +25,7 @@ const client: Client = djs_client
 
 console.log("[REM/Runtime] Loading execution context")
 
-const Runtime = new PrikolsHubRuntime(client)
+const Runtime = new REMRuntime(client)
 setExecutionContext(Runtime)
 setGlobalRuntime(Runtime)
 

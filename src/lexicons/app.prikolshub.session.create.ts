@@ -1,7 +1,7 @@
 import { LexiconDoc } from '@atproto/lexicon'
 import { XRPCContext } from '../api/Types'
 import { registerLexicon } from '../api/atproto/LexiconRegistrate'
-import { PrikolsHubRuntime, getGlobalRuntime } from '../api/PrikolsHubCore'
+import { REMRuntime, getGlobalRuntime } from '../api/REMCore'
 import { Session } from '../api/Session'
 
 const lexicon: LexiconDoc = {
@@ -26,7 +26,7 @@ const lexicon: LexiconDoc = {
 	},
 }
 
-const runtime: PrikolsHubRuntime = (getGlobalRuntime() as PrikolsHubRuntime)
+const runtime: REMRuntime = (getGlobalRuntime() as REMRuntime)
 
 async function method(ctx: XRPCContext) {
 	try {

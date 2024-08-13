@@ -1,7 +1,7 @@
 import { PlaceInformation, ThumbnailRequest, getPlaceInfo, getThumbnails } from "noblox.js";
 import * as noblox from "noblox.js";
 import { IncomingSessionMsgRequest, IncomingSessionMsgRequestResponse, QueuedDiscordMessage, RobloxMessage, SessionPlayer } from "./Types"
-import { PrikolsHubRuntime, getGlobalRuntime } from "./PrikolsHubCore";
+import { REMRuntime, getGlobalRuntime } from "./REMCore";
 
 export interface SessionData {
 	GameName: string,
@@ -78,7 +78,7 @@ export class BaseSession implements SessionData {
 	 */
 	protected async EndSession(...anything:any): Promise<void> {
 		this.SessionAccepted = false
-		const runtime: PrikolsHubRuntime = (getGlobalRuntime() as PrikolsHubRuntime)
+		const runtime: REMRuntime = (getGlobalRuntime() as REMRuntime)
 		await runtime.deleteSessionByJobId(this.JobId)
 	}
 

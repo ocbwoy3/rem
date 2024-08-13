@@ -21,8 +21,8 @@ export class Session extends BaseSession implements DiscordSessionData {
 		new Promise(async()=>{
 			// buttons
 
-			const keepsesbtn_d = `prikolshubtemp-${Date.now()}-keep`
-			const delsesbtn_d = `prikolshubtemp-${Date.now()}-delete`
+			const keepsesbtn_d = `rem_temp-${Date.now()}-keep`
+			const delsesbtn_d = `rem_temp-${Date.now()}-delete`
 			
 			const keepButton = new ButtonBuilder()
 				.setLabel('Keep')
@@ -116,7 +116,7 @@ export class Session extends BaseSession implements DiscordSessionData {
 		const forumChannel: ForumChannel = (await forumThread.client.channels.fetch(config.SessionForumChannelId) as ForumChannel)
 
 		const webhook: Webhook = await forumChannel.createWebhook({
-			name: `PrikolsHub_${Date.now()}`,
+			name: `REM_${Date.now()}`,
 			reason: `${this.GameName}`
 		})
 

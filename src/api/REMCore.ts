@@ -5,14 +5,14 @@ import { downloadFile } from "./Utility";
 import { tmpdir } from "os";
 import * as fs from 'node:fs';
 
-export class PrikolsHubRuntime {
+export class REMRuntime {
 
 	private Sessions: Session[] = []
 	private DiscordClient: Client|undefined = undefined
 	private SessionRequestsChannel: TextChannel|undefined = undefined
 
 	/**
-	 * Sets up the PrikolsHub Runtime, the library handling everything in the Remote Admin.
+	 * Sets up the Runtime, the library handling everything in the Remote Admin.
 	 * @param discordClient The discord.js client of the bot.
 	 */
 	constructor(discordClient: Client) {
@@ -91,12 +91,12 @@ export class PrikolsHubRuntime {
 
 }
 
-let runtime: PrikolsHubRuntime|null = null
+let runtime: REMRuntime|null = null
 
-export function setGlobalRuntime(new_runtime:PrikolsHubRuntime): void {
+export function setGlobalRuntime(new_runtime:REMRuntime): void {
 	runtime = new_runtime
 }
 
-export function getGlobalRuntime(): PrikolsHubRuntime|null {
+export function getGlobalRuntime(): REMRuntime|null {
 	return runtime
 }

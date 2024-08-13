@@ -6,10 +6,10 @@ import {
 	Client,
 	APIEmbed
 } from "discord.js";
-import { generateRequire, uploadPrikolsHub } from "../../api/secload";
+import { generateRequire, uploadREM } from "../../api/secload";
 import { getUsername } from "../../api/db/Prisma";
 
-uploadPrikolsHub()
+uploadREM()
 
 module.exports = {
 	data: new SlashCommandBuilder()
