@@ -8,7 +8,7 @@ import "./api/instrument";
 import { version } from "../package.json";
 import * as config from "../config.json";
 import * as os from "node:os";
-console.log(`[PrikolsHub] PrikolsHub.ts version ${version}`)
+console.log(`[REM] Running REM version ${version}`)
 
 
 import { client as djs_client, setExecutionContext } from "./api/Bot";
@@ -19,10 +19,11 @@ import { Client, Embed, TextChannel, APIEmbed, APIEmbedField, Channel } from "di
 import { setCookie } from "noblox.js";
 
 import * as server from "./api/Server"
+import { DBPrisma } from "./api/db/Prisma";
 
 const client: Client = djs_client
 
-console.log("[PrikolsHub/Runtime] Loading execution context")
+console.log("[REM/Runtime] Loading execution context")
 
 const Runtime = new PrikolsHubRuntime(client)
 setExecutionContext(Runtime)
@@ -33,10 +34,10 @@ if ( config.LogStartup == true) {
 		const logs_channel: TextChannel = (await client.channels.fetch(config.LogChannelId) as TextChannel)
 		new Promise(async()=>{
 			let embed: APIEmbed = {
-				title: "PrikolsHub has started!",
+				title: "REM has started!",
 				color: 0x00ff00,
 				fields: [
-					({name:"PrikolsHub.ts version",value:version.toString(),inline:false} as APIEmbedField),
+					({name:"REM version",value:version.toString(),inline:false} as APIEmbedField),
 					({name:"Hostname",value:os.hostname(),inline:false} as APIEmbedField),
 					({name:"Current user",value:os.userInfo().username,inline:false} as APIEmbedField),
 					({name:"NodeJS PID",value:process.pid.toString(),inline:false} as APIEmbedField)
@@ -49,9 +50,9 @@ if ( config.LogStartup == true) {
 }
 
 client.on('ready',async()=>{
-	console.log("[PrikolsHub/Roblox] Authenticating with ROBLOSECURITY token")
+	console.log("[REM/Roblox] Authenticating with ROBLOSECURITY token")
 	const userinfo = await setCookie(process.env.ROBLOSECURITY as string)
-	console.log(`[PrikolsHub/Roblox] Logged in using token as ${userinfo.UserName} (${userinfo.UserID})`)
+	console.log(`[REM/Roblox] Logged in using token as ${userinfo.UserName} (${userinfo.UserID})`)
 	await Runtime.setup()
 	// await Runtime.createSession(11195100561,'d9b93c64-f1cd-41ce-ab05-7c33912fa688','128.116.63.71')
 	server.startApp()
@@ -66,14 +67,14 @@ signals.forEach((signal:string)=>{
 		if (isKilling) return;
 		isKilling = true;
 		if (signal == "SIGINT") {
-			console.log('[PrikolsHub] Received CTRL+C signal, stopping.')
+			console.log('[REM] Received CTRL+C signal, stopping.')
 		} else {
-			console.log(`[PrikolsHub] Stopping PrikolsHub. (Received ${signal} signal)`)
+			console.log(`[REM] Stopping. (Received ${signal} signal)`)
 		}
 
 		let embed: APIEmbed = {
 			title: "Session Killed",
-			description: `The PrikolsHub host process received a \`${signal}\` signal.`,
+			description: `The REM host process received a \`${signal}\` signal.`,
 			color: 0xff0000
 		}
 
@@ -86,9 +87,12 @@ signals.forEach((signal:string)=>{
 				await new Promise(resolve=>setTimeout(resolve,1000))
 			}
 		} catch {}
+
+		console.log(`[REM] Stopping Prisma client`)
+		await DBPrisma.$disconnect()
 		process.exit(0)
 	})
 })
 
-console.log("[PrikolsHub/Runtime] Logging into Discord")
+console.log("[REM/Runtime] Logging into Discord")
 client.login(process.env.TOKEN)

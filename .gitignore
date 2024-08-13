@@ -1,8 +1,8 @@
 node_modules/
 dist/
 .env
-# Sentry Config File
 .sentryclirc
 
-# Sentry Config File
-.sentryclirc
+prisma/migrations
+prisma/dev.db
+prisma/prod.db

@@ -35,7 +35,7 @@ export class PrikolsHubRuntime {
 		for (let i=0; i < this.Sessions.length; i++) {
 			if (this.Sessions[i].JobId == jobId) {
 				delete this.Sessions.splice(i,1)[1];
-				console.log(`[PrikolsHub/Runtime] Deleted session "${jobId}"`)
+				console.log(`[REM/Runtime] Deleted session "${jobId}"`)
 				// console.log(this.Sessions)
 			}
 		}
@@ -58,7 +58,7 @@ export class PrikolsHubRuntime {
 		const newSession = new Session(placeId,jobId,ipAddress)
 		await newSession.SetupSession()
 		this.Sessions.push(newSession)
-		console.log(`[PrikolsHub/Runtime] New session request from "${newSession.GameName}" - ${newSession.PlaceId} (IP: ${newSession.ServerIPAddress})`)
+		console.log(`[REM/Runtime] New session request from "${newSession.GameName}" - ${newSession.PlaceId} (IP: ${newSession.ServerIPAddress})`)
 
 		const accept_session = new ButtonBuilder()
 			.setCustomId(`accept_mksession|${jobId}`)
@@ -74,7 +74,7 @@ export class PrikolsHubRuntime {
 			.addComponents(accept_session, decline_session);
 
 		// download the thumbnail
-		const filepath = await downloadFile(newSession.thumbnailUrl,`${tmpdir()}/prikolshub-temp-${Date.now()}.png`)
+		const filepath = await downloadFile(newSession.thumbnailUrl,`${tmpdir()}/rem-temp-${Date.now()}.png`)
 
 		await this.SessionRequestsChannel?.send({
 			content: `# [\`${newSession.GameName}\`]( <${newSession.gameUrl}> )

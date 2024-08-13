@@ -6,7 +6,7 @@ const PORT = process.env.PORT || 2929;
 import * as Sentry from "@sentry/node";
 
 export const app = express()
-console.log(`[PrikolsHub/Sentry] Set up Express error handler.`)
+console.log(`[REM/Sentry] Set up Express error handler.`)
 Sentry.setupExpressErrorHandler(app)
 
 /*
@@ -15,9 +15,13 @@ app.get("/debug-sentry", function mainHandler(req, res) {
 });
 */
 
+app.get("/",function(req,res) {
+	res.send("Most API routes are avaiable under /xrpc/")
+})
+
 export function startApp() {
 	
-	console.log(`[PrikolsHub/atproto] Loading atproto`)
+	console.log(`[REM/atproto] Loading atproto`)
 	
 	loadLexicons()
 
@@ -25,6 +29,6 @@ export function startApp() {
 	app.use(xrpc_server.router)
 	
 	app.listen(PORT,async()=>{
-		console.log(`[PrikolsHub/Server] Started express server at http://127.0.0.1:${PORT}`)
+		console.log(`[REM/Server] Started express server at http://127.0.0.1:${PORT}`)
 	})
 }

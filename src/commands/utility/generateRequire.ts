@@ -7,21 +7,25 @@ import {
 	APIEmbed
 } from "discord.js";
 import { generateRequire, uploadPrikolsHub } from "../../api/secload";
+import { getUsername } from "../../api/db/Prisma";
 
 uploadPrikolsHub()
 
 module.exports = {
-	gdpr: true,
-	moderation_bypass: true,
 	data: new SlashCommandBuilder()
 		.setName('script')
-		.setDescription('Generate a require.')
-		.addStringOption(builder=>builder.setName("username").setDescription("Your Roblox username.").setRequired(true)),
+		.setDescription('Generate a require.'),
 	async execute(interaction: CommandInteraction) {
 
 		await interaction.deferReply({ephemeral:false, fetchReply: true})
 
-		const username: string = (interaction.options.get('username')?.value as string)
+		const username: string = await getUsername(interaction.user.id)
+
+		if (username === "REM_UNDEFINED_USERNAME") {
+			await interaction.followUp({ content: "Your username is not set, please set it using the `/account` command.", ephemeral: true })
+			return
+		}
+
 		const require = await generateRequire(username)
 
 		await interaction.followUp({ content: `\`\`\`lua\n${require}\n\`\`\`` })

@@ -28,12 +28,12 @@ function formatBytes(bytes: number, decimals = 2, noext:boolean=false): string {
 
 module.exports = {
 	data: new SlashCommandBuilder()
-	.setName('sysinfo')
-	.setDescription('Provides information about the device PrikolsHub is running on.'),
+		.setName('sysinfo')
+		.setDescription('Provides information about the device REM is running on.'),
 	async execute(interaction: CommandInteraction) {
 
 		if (os.type()!='Linux') {
-			await interaction.reply({ephemeral:true,content:"This command is only supported on Linux."})
+			await interaction.reply({ephemeral:true,content:"Current machine running REM is not running GNU/Linux."})
 			return;
 		}
 
@@ -89,24 +89,22 @@ module.exports = {
 			}))
 		}
 
-		const msg = `# Device information
-		**User:** ${os.userInfo().username}@${os.hostname()}
+		const msg = `# ${os.userInfo().username}@${os.hostname()}
 		**Uptime:** \`${uptimeoutput}, since ${uptimeoutput_2}\`
 		**OS:** ${osPrettyName}
-		**CPU:** ${sicpu.cores}x ${sicpuspeed.avg}GHz ${sicpu.manufacturer} ${sicpu.brand} ${sicpu.model}
+		**CPU:** ${sicpu.cores}x ${sicpu.manufacturer} ${sicpu.brand} @ ${sicpuspeed.avg} GHz
 		**CPU Temp:** ${sicputemp.main}°C
 		**System:** ${sisys.manufacturer} ${sisys.model}
 		**Memory (used/total):** ${formatBytes(simem.used,2)} of ${formatBytes(simem.total,2)}
-		**Swap (used/total):** ${formatBytes(simem.swapused,2)} of ${formatBytes(simem.swaptotal,2)}
+		**${os.type()=='Windows_NT' ? 'Pagefile' : "Swap"} (used/total):** ${formatBytes(simem.swapused,2)} of ${formatBytes(simem.swaptotal,2)}
 		**Disk \`${os.type()=='Windows_NT' ? 'C:\\' : "/"}\` (used/total):** ${formatBytes(diskusedroot.size-diskusedroot.free,2)} of ${formatBytes(diskusedroot.size,2)} 
 		
-		# PrikolsHub.ts
-		**Version:** ${require("../../../package.json").version}
-		**Proccess ID:** ${process.pid}
-		**Working dir:** \`${cwd()}\`
+		# rem@${require("../../../package.json").version}
+		**PID:** ${process.pid}
+		**CWD:** \`${cwd()}\`
 
-		# AT Protocol (atproto)
-		**Loaded Lexicons:** ${Object.keys(getMethods()).length}
+		# Lexicon Registrate
+		**\`LoadedLexicons.length\`:** ${Object.keys(getMethods()).length}
 		\`\`\`
 		${Object.keys(getMethods()).join(', ')}
 		\`\`\`

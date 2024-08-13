@@ -69,7 +69,7 @@ export class BaseSession implements SessionData {
 	public async AcceptSession(...anything:any): Promise<void> {
 		// HACK: Fix Target sig provides too few args by adding ...anything:any to base func!!!
 		// TODO: Figure out an alternative in prod
-		console.log(`[PrikolsHub/Chat] (${this.JobId.slice(0,5)}) Session Accepted - ${this.GameName}`)
+		console.log(`[REM/Chat] (${this.JobId.slice(0,5)}) Session Accepted - ${this.GameName}`)
 		this.SessionAccepted = true
 	}
 
@@ -87,7 +87,7 @@ export class BaseSession implements SessionData {
 	 * @param msg The message to process.
 	 */
 	protected async processMessage(msg: RobloxMessage): Promise<void> {
-		console.log(`[PrikolsHub/Chat] R[${this.JobId.slice(0,5)}] <${msg[0].replace(/ \(@(.*)/giu,'')}> ${msg[2]}`)
+		console.log(`[REM/Chat] R[${this.JobId.slice(0,5)}] <${msg[0].replace(/ \(@(.*)/giu,'')}> ${msg[2]}`)
 	}
 
 	/**
@@ -122,7 +122,7 @@ export class BaseSession implements SessionData {
 	 * @param messageContent The message's content
 	 */
 	public async queueMessage(displayName:string,nameColor:string,messageContent:string): Promise<void> {
-		console.log(`[PrikolsHub/Chat] D[${this.JobId.slice(0,5)}] <${displayName}> ${messageContent.slice(0,500)}`)
+		console.log(`[REM/Chat] D[${this.JobId.slice(0,5)}] <${displayName}> ${messageContent.slice(0,500)}`)
 		this.QueuedDiscordMessages.push([displayName,nameColor,messageContent.slice(0,500)])
 	}
 
@@ -131,7 +131,7 @@ export class BaseSession implements SessionData {
 	 * @param messageContent The message to queue
 	 */
 	public async queueGlobalMessage(messageContent:string): Promise<void> {
-		this.QueuedDiscordMessages.push(["PrikolsHub","ff0000",messageContent])
+		this.QueuedDiscordMessages.push(["REM","ff0000",messageContent])
 	}
 
 	/**
@@ -139,8 +139,8 @@ export class BaseSession implements SessionData {
 	 * @param messageContent The message to queue
 	 */
 	public async queueSystemMessage(messageContent:string): Promise<void> {
-		console.log(`[PrikolsHub/Chat] S[${this.JobId.slice(0,5)}] <PrikolsHub> ${messageContent.slice(0,500)}`)
-		this.QueuedDiscordMessages.push(["PrikolsHub","ff0000",messageContent])
+		console.log(`[REM/Chat] S[${this.JobId.slice(0,5)}] <REM> ${messageContent.slice(0,500)}`)
+		this.QueuedDiscordMessages.push(["REM","ff0000",messageContent])
 	}
 
 	/**

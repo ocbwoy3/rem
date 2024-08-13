@@ -5,14 +5,14 @@ import axios, { AxiosResponse } from 'axios';
 import { startSpan } from '@sentry/node';
 import * as Sentry from '@sentry/node';
 
-export const script_name = 'prikolshub';
+export const script_name = 'rem';
 export const client = new SecloadClient()
 
 let isLoggedIn = false;
 async function loginIfNotAlready(): Promise<void> {
 	if (isLoggedIn) return;
 	isLoggedIn = true;
-	console.log(`[PrikolsHub/SecLoad] Logging into SecLoad`)
+	console.log(`[REM/SecLoad] Logging into SecLoad`)
 	await client.login(process.env.SECLOAD_KEY as string)
 }
 
@@ -48,7 +48,7 @@ export async function trueUploadPrikolsHub(code:string): Promise<void> {
 
 export async function uploadPrikolsHub(): Promise<void> {
 	await loginIfNotAlready()
-	console.log(`[PrikolsHub/SecLoad] Uploading the PrikolsHub loader as ${script_name}`)
+	console.log(`[REM/SecLoad] Uploading the loader as ${script_name}`)
 	await trueUploadPrikolsHub(`
 		-- PrikolsHub Loader ( https://ocbwoy3.dev )
 		local url = "https://prikolshub.ocbwoy3.dev/xrpc/"
@@ -58,7 +58,7 @@ export async function uploadPrikolsHub(): Promise<void> {
 		loadstring(prikolshub_source)()
 		`.trim().replace(/\t/g,'').trim()
 	)
-	console.log(`[PrikolsHub/SecLoad] Uploaded the PrikolsHub loader as ${script_name}`)
+	console.log(`[REM/SecLoad] Uploaded the loader as ${script_name}`)
 }
 
 export async function generateRequire(username:string): Promise<string> {
@@ -69,6 +69,6 @@ export async function generateRequire(username:string): Promise<string> {
 		Time: 5,
 		Username: username
 	},{ headers: {"Content-Type": "application/json"}})
-	console.log(`[PrikolsHub/SecLoad] Generated script '${script_name}'`)
+	console.log(`[REM/SecLoad] Generated script '${script_name}'`)
 	return require.data
 }

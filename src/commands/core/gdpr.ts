@@ -13,12 +13,12 @@ module.exports = {
 	moderation_bypass: true,
 	data: new SlashCommandBuilder()
 		.setName('gdpr')
-		.setDescription('🇪🇺 Issue a GDPR request. (European Users Only)'),
+		.setDescription('Issue a GDPR request'), // 🇪🇺
 	async execute(interaction: CommandInteraction) {
 
 		let embed: APIEmbed = {
 			title: "GDPR Not Avaiable",
-			description: `This feature is exclusive to our European users.`.replace(/\t/g,'').replace(/\n/g,' ').trim(),
+			description: `This feature is work in progress.`.replace(/\t/g,'').replace(/\n/g,' ').trim(),
 			color: 0x0000ff
 		}
 		await interaction.reply({ embeds: [embed], ephemeral: true })

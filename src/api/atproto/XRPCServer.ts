@@ -16,7 +16,7 @@ export async function loadLexicons() {
 			const lexicon = require(filePath);
 		} catch(e_) {
 			// console.error(e_)
-			console.warn(`[PrikolsHub/atproto] Loading lexicon errored: ${filePath}`);
+			console.warn(`[REM/atproto] Loading lexicon errored: ${filePath}`);
 		}
 	}
 }
@@ -26,7 +26,7 @@ export function makeServer(): xrpc.Server {
 	const lexicons = LexiconRegistrate.getMethods()
 	for (let lexicon in lexicons) {
 		server.method(lexicon,lexicons[lexicon])
-		console.log(`[PrikolsHub/atproto] Loaded lexicon ${lexicon}`);
+		console.log(`[REM/atproto] Loaded lexicon ${lexicon}`);
 	}
 	return server
 }

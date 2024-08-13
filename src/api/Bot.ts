@@ -32,6 +32,7 @@ import { Session } from "./Session";
 import { downloadFile } from "./Utility";
 import { tmpdir } from "node:os";
 import { message } from "noblox.js";
+import { checkUserModStatus, ModerationReport } from "./db/Prisma";
 
 const intents = [
 	GatewayIntentBits.Guilds,
@@ -50,7 +51,7 @@ export const client: any = (new Client({
 		status: 'dnd',
 		activities: [
 			{
-				name: "app.prikolshub.main",
+				name: "REM, the real thing",
 				type: ActivityType.Playing
 			}
 		]
@@ -77,7 +78,7 @@ async function registerCommands() {
 				commands.push(command.data.toJSON());
 				client.commands.set(command.data.name, command)
 			} else {
-				console.warn(`[PrikolsHub/Bot:registerCommands] The command at ${filePath} is missing a required "data" or "execute" property.`);
+				console.warn(`[REM/Bot:registerCommands] The command at ${filePath} is missing a required "data" or "execute" property.`);
 			}
 		}
 	}
@@ -88,7 +89,7 @@ async function registerCommands() {
 	// and deploy your commands!
 	await (async () => {
 		try {
-			console.log(`[PrikolsHub/Bot:registerCommands] Started refreshing ${commands.length} command(s).`);
+			console.log(`[REM/Bot:registerCommands] Started refreshing ${commands.length} command(s).`);
 
 			// The put method is used to fully refresh all commands in the guild with the current set
 			const data = await rest.put(
@@ -96,7 +97,7 @@ async function registerCommands() {
 				{ body: commands },
 			);
 
-			console.log(`[PrikolsHub/Bot:registerCommands] Successfully reloaded ${(data as any).length} command(s).`);
+			console.log(`[REM/Bot:registerCommands] Successfully reloaded ${(data as any).length} command(s).`);
 		} catch (error) {
 			// And of course, make sure you catch and log any errors!
 			console.error(error);
@@ -105,14 +106,14 @@ async function registerCommands() {
 }
 
 client.on('ready', async () => {
-	console.log(`[PrikolsHub/Bot:onReady] Logged in as ${(client.user as User).tag}`);
+	console.log(`[REM/Bot:onReady] Logged in as ${(client.user as User).tag}`);
 	await client.application.fetch()
 	try {
 		await registerCommands()
 	} catch (e_: any) {
-		console.warn(`[PrikolsHub/Bot:onReady] Failed to register commands: ${e_.toString()}`)
+		console.warn(`[REM/Bot:onReady] Failed to register commands: ${e_.toString()}`)
 	}
-	console.log(`[PrikolsHub/Bot:onReady] Bot successfully loaded!`)
+	console.log(`[REM/Bot:onReady] Bot successfully loaded!`)
 });
 
 var executionContext: PrikolsHubRuntime | null = null;
@@ -136,7 +137,7 @@ client.on(Events.MessageCreate, async(message: Message) => {
 		if (cont.length === 0) return;
 		
 		await ses.queueMessage(
-			(message.author.displayName.slice(0,50) || "prikolshub_undefined_nickname"),
+			(message.author.displayName.slice(0,50) || "rem_undefined_nick"),
 			(message.member?.displayHexColor.slice(1) || "ff0000"),
 			cont
 		)
@@ -151,24 +152,39 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
 
 			if (interaction.isAutocomplete()) return;
 
-			if (interaction.user.id.toString() in Blacklist) {
-				
-				const reason: [string, string] = (Blacklist as any)[interaction.user.id.toString()]
+			const modStatus: ModerationReport|null = await checkUserModStatus(interaction.user.id)
 
-				// Twitch's "Banned from ..." UX is poorly made, I guess. So remake it in PrikolsHub!
+			if (modStatus != null) {
 
-				let embed: APIEmbed = {
-					title: ":warning: You are banned.",
-					// top tier discord://-/users/1
-					// intentionally being vague about how we ban (user id's) by lying to end user so they dont know
-					description: `**Banned using account descriptor.**\nYou are unable to use PrikolsHub until a moderator unbans you. You may be able to request an unban at https://ocbwoy3.dev/appeal or by DMing the [owner]( <discord://-/users/${(client as any).application?.owner?.owner?.id || (client as Client).application?.owner?.id}>) of this bot.`,
-					color: 0xff0000,
-					fields: [
-						({ name: "Reason", value: reason[1], inline: false } as APIEmbedField)
-					]
+				async function doIt(ms: ModerationReport) {
+					// Twitch's "Banned from ..." UX is poorly made, I guess. So remake it!
+
+					let embed: APIEmbed = {
+						title: ":warning: You are banned.",
+						// top tier discord://-/users/1
+						// intentionally being vague about how we ban (user id's) by lying to end user so they dont know
+						description: `**Banned using account descriptor.**\nYou are unable to use REM until a moderator unbans you. You may be able to request an unban at https://ocbwoy3.dev/appeal or by DMing the [owner]( <discord://-/users/${(client as any).application?.owner?.owner?.id || (client as Client).application?.owner?.id}>) of this bot.`,
+						color: 0xff0000,
+						fields: [
+							({ name: "Reason", value: ms.reason, inline: false } as APIEmbedField),
+							({ name: "Moderator", value: `<@${ms.moderatorId}>`, inline: false } as APIEmbedField)
+						]
+					}
+					if (!interaction.isRepliable()) return;
+					await interaction.reply({ embeds: [embed], ephemeral: true })
 				}
-				await interaction.reply({ embeds: [embed], ephemeral: true })
-				return
+
+				if (!interaction.isChatInputCommand()) {
+					await doIt(modStatus);
+					return;
+				};
+
+				const command = client.commands.get(interaction.commandName);
+				if (!(command.moderation_bypass)) {
+					await doIt(modStatus);
+					return;
+				}
+				
 			}
 
 			if (interaction.isButton()) {
@@ -228,9 +244,9 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
 			const command = client.commands.get(interaction.commandName);
 
 			if (!command) {
-				console.error(`[PrikolsHub/Bot:interactionHandler] No command matching "${interaction.commandName}" was found, something shady is going on!`);
+				console.error(`[REM/Bot:interactionHandler] No command matching "${interaction.commandName}" was found, something shady is going on!`);
 				await interaction.reply({
-					content: `[PrikolsHub.ts] Cannot find command in \`client.commands\`, something shady is going on!`,
+					content: `[REM] Cannot find command in \`client.commands\`, something shady is going on!`,
 					ephemeral: true
 				})
 				return;
@@ -241,9 +257,9 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
 			} catch (error) {
 				console.error(error);
 				if (interaction.replied || interaction.deferred) {
-					await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+					await interaction.followUp({ content: `\`\`\`\n${error}\n\`\`\``, ephemeral: true });
 				} else {
-					await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+					await interaction.reply({ content: `\`\`\`\n${error}\n\`\`\``, ephemeral: true });
 				}
 			}
 
@@ -252,9 +268,9 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
 			if (interaction.isAutocomplete()) return;
 			try {
 				if (interaction.replied || interaction.deferred) {
-					await interaction.followUp({ content: '[PrikolsHub.ts] Error', ephemeral: true });
+					await interaction.followUp({ content: `\`\`\`\n${e_}\n\`\`\``, ephemeral: true });
 				} else {
-					await interaction.reply({ content: '[PrikolsHub.ts] Error', ephemeral: true });
+					await interaction.reply({ content: `\`\`\`\n${e_}\n\`\`\``, ephemeral: true });
 				}
 			} catch {}
 		}

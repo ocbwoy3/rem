@@ -15,4 +15,4 @@ Sentry.init({
 	profilesSampleRate: 1.0,
 });
 
-console.log(`[PrikolsHub/Sentry] Started Sentry error tracking`)
+console.log(`[REM/Sentry] Started Sentry error tracking`)

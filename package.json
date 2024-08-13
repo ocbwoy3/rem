@@ -1,10 +1,10 @@
 {
-  "name": "prikolshub.ts",
+  "name": "rem",
   "version": "1.0.0",
-  "description": "The PrikolsHub remote admin.",
+  "description": "The REM remote admin.",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "trap \"rm -r dist\" EXIT && tsc && pnpm sentry:sourcemaps && clear && node --no-deprecation dist/src/index.js",
+    "dev": "trap \"rm -r dist\" EXIT && tsc && clear && node --no-deprecation dist/src/index.js",
     "dev_windows": "del /Q dist && npx tsc && cls && node --no-deprecation dist/src/index.js",
     "build": "tsc && pnpm sentry:sourcemaps",
     "start": "node --no-deprecation dist/src/index.js",
@@ -12,19 +12,21 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ocbwoy3/PrikolsHub.ts.git"
+    "url": "git+https://github.com/ocbwoy3/rem.git"
   },
   "author": "OCbwoy3",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ocbwoy3/PrikolsHub.ts/issues"
+    "url": "https://github.com/ocbwoy3/rem/issues"
   },
-  "homepage": "https://github.com/ocbwoy3/PrikolsHub.ts#readme",
+  "homepage": "https://github.com/ocbwoy3/rem#readme",
   "dependencies": {
     "@atproto/identity": "^0.4.0",
     "@atproto/xrpc-server": "^0.5.2",
     "@fastify/middie": "^8.3.1",
     "@fastify/static": "^7.0.4",
+    "@prisma/client": "^5.18.0",
+    "@prisma/extension-accelerate": "^1.1.0",
     "@sapphire/cli": "^1.9.3",
     "@sapphire/discord.js-utilities": "^7.3.0",
     "@sapphire/framework": "^5.2.1",
@@ -52,6 +54,7 @@
     "@types/express": "^4.17.21",
     "@types/node": "^20.14.10",
     "@types/request": "^2.48.12",
-    "@types/swagger-ui-express": "^4.1.6"
+    "@types/swagger-ui-express": "^4.1.6",
+    "prisma": "^5.18.0"
   }
 }

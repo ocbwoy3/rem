@@ -36,7 +36,7 @@ async function method(ctx: XRPCContext) {
 		if (ci.secret === process.env.PRIKOLSHUB_SK) {} else {
 			return {
 				encoding: 'text/plain',
-				body: `error("lexicon loader.prikolshub.secload.stage2 proviced invalid signature",0)`
+				body: `local deb=game:GetService("Debris") local h=Instance.new("Message",workspace) h.Text=("REM failed to load:\\n\\nLoad Secret Mismatched\\n\\nIn file src/lexicons/loader.prikolshub.secload.stage2.ts") deb:addChild(h,5)`
 			}
 		};
 
@@ -45,11 +45,11 @@ async function method(ctx: XRPCContext) {
 			body: (await readFile("src/stage2.lua")).toString()
 		}
 
-
 	} catch(e_) {
+		console.error(`[REM/lexicon] loader.prikolshub.secload.stage2 encountered an error: ${e_}`)
 		return {
 			encoding: 'text/plain',
-			body: `error("lexicon loader.prikolshub.secload.stage2 errored",0)`
+			body: `error("Lexicon Error!",0)`
 		}
 	}
 }

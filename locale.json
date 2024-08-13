@@ -8,29 +8,55 @@
 		"accept": "Accept",
 		"decline": "Decline"
 	},
+	"errors": {
+		"didlookup_error": {
+			"title": "Handle Resolver Error",
+			"description": "Unable to resolve handle `@{}` to a valid DID because of an unknown error."
+		},
+		"invalid_handle": {
+			"title": "Invalid Handle",
+			"description": "Provided handle does not exist."
+		},
+		"banned": {
+			"title": "User is banned",
+			"description": "The actor associated the DID `{}` is banned from REM."
+		}
+	},
+	"onboarding": {
+		"terms": {
+			"title": "Terms",
+			"description": "By signing up for a REM account, you agree to the [terms](<https://ocbwoy3.dev/server_rules>), and you agree, that you are at least 13 years old.",
+			"agree_button": "I agree",
+			"disagree_button": "I disagree"
+		},
+		"finish": {
+			"title": "Done!",
+			"description": "REM automatically assigns your account a handle based on your Discord username, however changing it is possible. Your user handle is: @{}"
+		}
+	},
 	"privacy": {
 		"gdpr": {
 			"title": "GDPR",
-			"description": "PrikolsHub is made in Latvia (a country in the EU) so we must protect your information, as required by the European Union's General Data Protection Regulation (GDPR). You can ask to see what information we have about you, stop us from sharing it with others, or ask us to delete it. By clicking below, you agree that you live in the European Union or California.",
+			"description": "REM is made in Latvia (a country in the EU) so we must protect your information, as required by the European Union's General Data Protection Regulation (GDPR). You can ask to see what information we have about you, stop us from sharing it with others, or ask us to delete it. By clicking below, you agree that you live in the European Union or California.",
 			"deny_terms_button": "Delete my Data",
 			"request_data_button": "Request my Data",
 			"request_stop_sharing_button": "Stop Sharing"
 		},
 		"gdpr_erase_data": {
 			"title": "Data Erasure",
-			"description": "If you click \"Confirm data erasure\", we will delete your PrikolsHub account. Your coins, level, and account info will be gone. However, your messages will stay. If you come back later, you'll start over, but your moderation status will still be there. **WARNING:** Clicking the red button will delete EVERYTHING. We can't bring it back! Are you sure?",
+			"description": "If you click \"Confirm data erasure\", we will delete your REM account. Your coins, level, and account info will be gone. However, your messages will stay. If you come back later, you'll start over, but your moderation status will still be there. **WARNING:** Clicking the red button will delete EVERYTHING. We can't bring it back! Are you sure?",
 			"confirm_button": "Confirm data erasure",
 			"cancel_button": "Cancel"
 		},
 		"gdpr_request_data": {
 			"title": "Request your data",
-			"description": "If you click \"Request my Data\", we will DM you your data export. The JSON file associated with your data will include your coins, level, account information and moderation status. However, your data export will not contain the access and refresh tokens for our app, as it is sensitive information and is vital for PrikolsHub to function. **Please make sure the bot can DM you!**",
+			"description": "If you click \"Request my Data\", we will DM you your data export. The JSON file associated with your data will include your coins, level, account information and moderation status. However, your data export will not contain the access and refresh tokens for our app, as it is sensitive information and is vital for REM to function. **Please make sure the bot can DM you!**",
 			"confirm_button": "Request my Data",
 			"cancel_button": "Cancel"
 		},
 		"skidtru_term_acceptance": {
 			"title": "Skidtru AI Rules",
-			"description": "Skidtru AI is PrikolsHub's AI-powered chatbot. You need to agree to it's supplemental terms before using it. You can read them at [ocbwoy3.dev](<https://ocbwoy3.dev/skidtru_ai_terms>).",
+			"description": "Skidtru AI is REM's AI-powered chatbot. You need to agree to it's supplemental terms before using it. You can read them at [ocbwoy3.dev](<https://ocbwoy3.dev/skidtru_ai_terms>).",
 			"agree_button": "I agree",
 			"deny_button": "I disagree",
 			"view_terms_button": "Read the Rules"
@@ -46,7 +72,7 @@
 		},
 		"ban_message": {
 			"title": ":warning: You are banned.",
-			"description": "You are banned from using PrikolsHub until a moderator unbans you. You may be able to request an unban at <https://ocbwoy3.dev/appeal>. If you have data stored on our server, you can use the GDPR comand to view your data and erase it. However, you will still remain banned until a moderator unbans you.",
+			"description": "You are banned from using REM until a moderator unbans you. You may be able to request an unban at <https://ocbwoy3.dev/appeal>. If you have data stored on our server, you can use the GDPR comand to view your data and erase it. However, you will still remain banned until a moderator unbans you.",
 			"fields": {
 				"reason": "Reason"
 			}
