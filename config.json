@@ -3,8 +3,6 @@
 	"LogChannelId": "1256308196038152192",
 	"SessionRequestsChannelId": "1256308256624742483",
 	"SessionForumChannelId": "1256308151804887150",
-	"Blacklist": {
-		"376467030385229834": ["Example User","112 Banned on linked Roblox account."]
-	},
+	"Blacklist": {},
 	"LogStartup": false
 }
