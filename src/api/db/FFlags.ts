@@ -16,13 +16,17 @@ export async function GetFFlag(fflag: string): Promise<boolean> {
 }
 
 async function GetFFlagUnsafe(fflag: string): Promise<boolean|null> {
-	const flagdata: FFlag | null = await prisma.featureFlag.findFirst({
-		where: {
-			name: { equals: fflag }
-		}
-	})
-	if (flagdata===null) return null;
-	return flagdata.state
+	try {
+		const flagdata: FFlag | null = await prisma.featureFlag.findFirst({
+			where: {
+				name: { equals: fflag }
+			}
+		})
+		if (flagdata===null) return null;
+		return flagdata.state
+	} catch {
+		return null
+	}
 }
 
 export async function SetFFlag(fflag: string, state: boolean): Promise<void> {
