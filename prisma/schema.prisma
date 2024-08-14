@@ -22,3 +22,8 @@ model PrikolsHubServiceBan {
 	reason         String
 	moderatorId    String           // discord userid of the moderator
 }
+
+model FeatureFlag {
+	name   String   @id @unique
+	state  Boolean
+}

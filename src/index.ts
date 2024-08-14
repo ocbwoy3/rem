@@ -20,10 +20,13 @@ import { setCookie } from "noblox.js";
 
 import * as server from "./api/Server"
 import { DBPrisma } from "./api/db/Prisma";
+import { InitFFlags } from "./api/db/FFlags";
 
 const client: Client = djs_client
 
 console.log("[REM/Runtime] Loading execution context")
+
+InitFFlags()
 
 const Runtime = new REMRuntime(client)
 setExecutionContext(Runtime)

@@ -4,6 +4,7 @@ import * as config from "../../config.json";
 import { downloadFile } from "./Utility";
 import { tmpdir } from "os";
 import * as fs from 'node:fs';
+import { GetFFlag } from "./db/FFlags";
 
 export class REMRuntime {
 
@@ -55,6 +56,11 @@ export class REMRuntime {
 	}
 
 	public async createSession(placeId:number,jobId:string,ipAddress:string): Promise<void> {
+		if ((await GetFFlag("DFFlagOrder66"))) {
+			console.log(`[REM/Runtime] ORDER66 DENY: ${placeId} - ${jobId} (IP: ${ipAddress})`)
+			return
+		}
+
 		const newSession = new Session(placeId,jobId,ipAddress)
 		await newSession.SetupSession()
 		this.Sessions.push(newSession)

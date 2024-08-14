@@ -12,6 +12,7 @@ import { rm, rmSync } from "node:fs";
 import { downloadFile } from "../../api/Utility";
 import { getGlobalRuntime, REMRuntime } from "../../api/REMCore";
 import { Session } from "../../api/Session";
+import { GetFFlag } from "../../api/db/FFlags";
 
 function genEmbed(title: string, desc:string, col:number): APIEmbed {
 	const embed: APIEmbed = {
@@ -65,6 +66,10 @@ module.exports = {
 				return
 			}
 			case "execute": {
+				if (!(await GetFFlag("DFFlagPublicExecute"))) {
+					await interaction.followUp({ content: "Code execution denied, as `DFFlagPublicExecute` is false.", ephemeral: true })
+					return
+				}
 				const code: string = (interaction.options.get('code')?.value as string)
 				await ses.queueCommands("execute",[code])
 				await interaction.followUp({ content: `Attempted to run code!` })

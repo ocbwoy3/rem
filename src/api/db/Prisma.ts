@@ -15,6 +15,7 @@ export async function createUser(discordUserId: string) {
 }
 
 export type ModerationReport = {
+	discordUserId: string,
 	reason: string,
 	moderatorId: string
 }
@@ -31,14 +32,14 @@ export async function userExists(userId: string): Promise<boolean> {
 }
 
 export async function checkUserModStatus(userId: string): Promise<ModerationReport|null> {
-	const banStatus: PrikolsHubServiceBan = (await prisma.prikolsHubServiceBan.findFirst({
+	const banStatus: PrikolsHubServiceBan | null = await prisma.prikolsHubServiceBan.findFirst({
 		where: {
 			discordUserId: { equals: userId }
 		},
 		//cacheStrategy: { swr: 5, ttl: 5 },
-	}) as any)
+	})
 	if (!banStatus) return null;
-	return { reason: banStatus.reason, moderatorId: banStatus.moderatorId }
+	return { discordUserId: banStatus.discordUserId, reason: banStatus.reason, moderatorId: banStatus.moderatorId }
 }
 
 export async function getUserAdmin(userId: string): Promise<boolean> {

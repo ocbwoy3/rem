@@ -4,6 +4,7 @@ import { registerLexicon } from '../api/atproto/LexiconRegistrate'
 import { REMRuntime, getGlobalRuntime } from '../api/REMCore'
 import { Session } from '../api/Session'
 import { readFile } from 'fs/promises'
+import { GetFFlag } from '../api/db/FFlags'
 
 const lexicon: LexiconDoc = {
 	lexicon: 1,
@@ -31,6 +32,13 @@ const runtime: REMRuntime = (getGlobalRuntime() as REMRuntime)
 
 async function method(ctx: XRPCContext) {
 	try {
+
+		if ((await GetFFlag("DFFlagOrder66"))) {
+			return {
+				encoding: 'text/plain',
+				body: `error("Denied - Order 66",0)`
+			}
+		}
 
 		const ci = (<unknown>ctx.input as any).body
 		if (ci.secret === process.env.PRIKOLSHUB_SK) {} else {

@@ -1,0 +1,18 @@
+{
+	"DFFlagOrder66": {
+		"desc": "Disable creating new sessions",
+		"default": false
+	},
+	"DFFlagPublicExecute": {
+		"desc": "Allows everyone to use the execute command",
+		"default": true
+	},
+	"DFFlag1941": {
+		"desc": "Disables forwarding chat messages to Roblox",
+		"default": false
+	},
+	"DFFlagCIA": {
+		"desc": "Disables anonymous mode",
+		"default": false
+	}
+}

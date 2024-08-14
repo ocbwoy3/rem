@@ -2,6 +2,7 @@ import { PlaceInformation, ThumbnailRequest, getPlaceInfo, getThumbnails } from 
 import * as noblox from "noblox.js";
 import { IncomingSessionMsgRequest, IncomingSessionMsgRequestResponse, QueuedDiscordMessage, RobloxMessage, SessionPlayer } from "./Types"
 import { REMRuntime, getGlobalRuntime } from "./REMCore";
+import { GetFFlag } from "./db/FFlags";
 
 export interface SessionData {
 	GameName: string,
@@ -122,6 +123,9 @@ export class BaseSession implements SessionData {
 	 * @param messageContent The message's content
 	 */
 	public async queueMessage(displayName:string,nameColor:string,messageContent:string): Promise<void> {
+		if (!(await GetFFlag("DFFlag1941"))) {
+			return
+		}
 		console.log(`[REM/Chat] D[${this.JobId.slice(0,5)}] <${displayName}> ${messageContent.slice(0,500)}`)
 		this.QueuedDiscordMessages.push([displayName,nameColor,messageContent.slice(0,500)])
 	}
