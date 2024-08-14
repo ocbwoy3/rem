@@ -8,14 +8,32 @@ import {
 } from "discord.js";
 import { generateRequire, uploadREM } from "../../api/secload";
 import { getUsername } from "../../api/db/Prisma";
+import { GetFFlag } from "../../api/db/FFlags";
 
 uploadREM()
+
+function genEmbed(title: string, desc:string, col:number): APIEmbed {
+	const embed: APIEmbed = {
+		title: title,
+		description: desc,
+		color: col
+	}
+
+	return embed
+}
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('script')
 		.setDescription('Generate a require.'),
 	async execute(interaction: CommandInteraction) {
+
+		if ((await GetFFlag("DFFlagOrder66"))) {
+			await interaction.reply({
+				embeds: [genEmbed("Error","Cannot generate because of Order 66.",0xff0000)],
+				ephemeral: true
+			})
+		}
 
 		await interaction.deferReply({ephemeral:false, fetchReply: true})
 
