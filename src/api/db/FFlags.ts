@@ -33,7 +33,7 @@ export async function SetFFlag(fflag: string, state: boolean): Promise<void> {
 	const flagdata: boolean | null = await GetFFlagUnsafe(fflag)
 	console.log(`[REM/fflag] FFlag modified: ${fflag} | ${flagdata} -> ${state}`)
 
-	if (!flagdata) {
+	if (flagdata===null) {
 		await prisma.featureFlag.create({
 			data: {
 				name: fflag,
