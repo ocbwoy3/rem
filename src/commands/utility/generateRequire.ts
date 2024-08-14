@@ -33,6 +33,7 @@ module.exports = {
 				embeds: [genEmbed("Error","Cannot generate because of Order 66.",0xff0000)],
 				ephemeral: true
 			})
+			return
 		}
 
 		await interaction.deferReply({ephemeral:false, fetchReply: true})
