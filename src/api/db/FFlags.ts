@@ -22,7 +22,7 @@ async function GetFFlagUnsafe(fflag: string): Promise<boolean|null> {
 				name: { equals: fflag }
 			}
 		})
-		if (flagdata===null) return null;
+		if (!flagdata) return null;
 		return flagdata.state
 	} catch {
 		return null
