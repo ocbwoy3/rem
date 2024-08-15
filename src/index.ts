@@ -19,14 +19,12 @@ import { Client, Embed, TextChannel, APIEmbed, APIEmbedField, Channel } from "di
 import { setCookie } from "noblox.js";
 
 import * as server from "./api/Server"
-import { DBPrisma } from "./api/db/Prisma";
+import { prisma } from "./api/db/Prisma";
 import { InitFFlags } from "./api/db/FFlags";
 
 const client: Client = djs_client
 
 console.log("[REM/Runtime] Loading execution context")
-
-InitFFlags()
 
 const Runtime = new REMRuntime(client)
 setExecutionContext(Runtime)
@@ -92,10 +90,16 @@ signals.forEach((signal:string)=>{
 		} catch {}
 
 		console.log(`[REM] Stopping Prisma client`)
-		await DBPrisma.$disconnect()
+		await prisma.$disconnect()
 		process.exit(0)
 	})
 })
 
-console.log("[REM/Runtime] Logging into Discord")
-client.login(process.env.TOKEN)
+const StartREM = async()=>{
+	await InitFFlags()
+	console.log("[REM/Runtime] Logging into Discord")
+	client.login(process.env.TOKEN)
+}
+
+StartREM()
+

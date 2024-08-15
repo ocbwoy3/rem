@@ -1,5 +1,5 @@
 import AllFFlagsOld from "../../fflag_doc.json";
-import { DBPrisma as prisma } from "./Prisma";
+import { prisma } from "./Prisma";
 
 export type FFlagDoc = { [flag:string]: {desc: string, default: boolean} }
 export type FFlag = {name: string, state: boolean}
@@ -73,6 +73,7 @@ export async function GetAllFFlags(): Promise<{[flag:string]: boolean}> {
 }
 
 export async function InitFFlags(): Promise<void> {
+
 	const FFlagNames = Object.keys(AllFFlags)
 	console.log(`[REM/fflag] Checking ${FFlagNames.length} FFlags`)
 	let nonexistentFlags = 0

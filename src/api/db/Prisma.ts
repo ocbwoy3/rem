@@ -1,9 +1,7 @@
 import { PrikolsHubServiceBan, PrismaClient } from '@prisma/client'
 import { withAccelerate } from '@prisma/extension-accelerate'
 
-const prisma = new PrismaClient()//.$extends(withAccelerate())
-
-export const DBPrisma = prisma
+export const prisma = new PrismaClient()//.$extends(withAccelerate())
 
 export async function createUser(discordUserId: string) {
 	const user = await prisma.user.create({
