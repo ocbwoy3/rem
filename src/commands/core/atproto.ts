@@ -8,7 +8,7 @@ import {
 } from "discord.js";
 import { resolveHandleAtprotoData, resolveHandleToDid } from "../../api/atproto/DIDHandleResolver";
 import { AtprotoData } from "@atproto/identity";
-
+import { BotOwner } from "../../../config.json";
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -55,7 +55,7 @@ module.exports = {
 
         // did:plc:s7cesz7cr6ybltaryy4meb6y
 
-        if (interaction.user.id != "486147449703104523") {
+        if (interaction.user.id != BotOwner) {
 			await interaction.reply({ embeds: [embed], ephemeral: true })
 		}
 

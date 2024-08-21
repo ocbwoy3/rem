@@ -30,6 +30,14 @@ const lexicon: LexiconDoc = {
 
 const runtime: REMRuntime = (getGlobalRuntime() as REMRuntime)
 
+import * as config from "../../config.json";
+
+async function genExecutableCode(): Promise<string> {
+	const mainCode = (await readFile("src/stage2.lua")).toString()
+	const header = `local ROOT_URL="${config.RootURL}/xrpc/"`
+	return `-- REM, Remote Admin (https://ocbwoy3.dev)\n\n\n\n\n${header}\n\n\n${mainCode}`
+}
+
 async function method(ctx: XRPCContext) {
 	try {
 
@@ -50,7 +58,7 @@ async function method(ctx: XRPCContext) {
 
 		return {
 			encoding: 'text/plain',
-			body: (await readFile("src/stage2.lua")).toString()
+			body: await genExecutableCode()
 		}
 
 	} catch(e_) {

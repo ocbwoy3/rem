@@ -1,61 +1,102 @@
 // SecLoad 
 
-import { SecloadClient } from 'secload';
 import axios, { AxiosResponse } from 'axios';
 import { startSpan } from '@sentry/node';
 import * as Sentry from '@sentry/node';
 
 export const script_name = 'rem';
-export const client = new SecloadClient()
+const OBFUS = false
 
 let isLoggedIn = false;
+
+// useless shit, secload used secload.scriptlang.com, cloudflare waf broke it all
 async function loginIfNotAlready(): Promise<void> {
 	if (isLoggedIn) return;
 	isLoggedIn = true;
 	console.log(`[REM/SecLoad] Logging into SecLoad`)
-	await client.login(process.env.SECLOAD_KEY as string)
+}
+
+async function removeAllScripts(): Promise<void> {
+	let allScripts = await axios.post("https://secload.ocbwoy3.dev/secload/publicapi/ListScripts", {
+		Key: process.env.SECLOAD_KEY,
+	})
+	let allScriptsJ: string[] = allScripts.data
+	console.log(`[REM/secload] Deleting these ${allScriptsJ.length} scripts:`,allScriptsJ)
+	console.log(`[REM/secload] Deleting ALL ${allScriptsJ.length} scripts to free up space`)
+
+	let allPromises: Promise<boolean>[] = []
+	allScriptsJ.forEach((scr: string)=>{
+		allPromises.push(new Promise(async(resolve,reject)=>{
+			await axios.post("https://secload.ocbwoy3.dev/secload/publicapi/RemoveScript", {
+				Key: process.env.SECLOAD_KEY,
+				ScriptName: scr
+			})
+			console.log(`[REM/secload] Deleted ${scr} :3`)
+			resolve(true)
+		}))
+	})
+	await Promise.all(allPromises)
+	console.log(`[REM/secload] Deleted ${allScriptsJ.length} scripts :3`)
 }
 
 export async function trueUploadREM(code:string): Promise<void> {
+	await removeAllScripts()
 	try {
-		startSpan({
-			name: "Create REM Script",
-		},async()=>{
-			try {
-				await axios.post("https://secload.ocbwoy3.dev/secload/publicapi/CreateScript", {
-					Key: process.env.SECLOAD_KEY,
-					ScriptName: script_name,
-					Source: code,
-					Obfuscated: true
-				})
-			} catch {}
+		await axios.post("https://secload.ocbwoy3.dev/secload/publicapi/CreateScript", {
+			Key: process.env.SECLOAD_KEY,
+			ScriptName: script_name,
+			Source: code,
+			Obfuscated: OBFUS
 		})
 	} catch {
-		startSpan({
-			name: "Overwrite REM Script",
-		},async()=>{
-			try {
-				await axios.post("https://secload.ocbwoy3.dev/secload/publicapi/OverwriteScript", {
-					Key: process.env.SECLOAD_KEY,
-					ScriptName: script_name,
-					Source: code,
-					Obfuscated: true
-				})
-			} catch(e_) { Sentry.captureException(e_) }
-		})
+		try {
+			await axios.post("https://secload.ocbwoy3.dev/secload/publicapi/OverwriteScript", {
+				Key: process.env.SECLOAD_KEY,
+				ScriptName: script_name,
+				Source: code,
+				Obfuscated: OBFUS
+			})
+		} catch(e_) {
+			// AxiosError: Request failed with status code 413
+			if (((e_ as any).response as AxiosResponse).data === "API script list exceeds 5,000,000 Bytes (5 Megabytes)") {
+				console.log(`[REM/secload] All scripts exceeded 5 MB, what the fuck?`)
+				Sentry.captureException(e_)
+			} else {
+				console.log(`[REM/secload] Failed to overwrite SecLoad Script, what the fuck?`)
+				console.log(e_)
+				Sentry.captureException(e_)
+			}
+		}
 	}
 }
 
+import * as config from "../../config.json";
+
 export async function uploadREM(): Promise<void> {
-	await loginIfNotAlready()
+
+	let allScripts = await axios.post("https://secload.ocbwoy3.dev/secload/publicapi/ListScripts", {
+		Key: process.env.SECLOAD_KEY,
+	})
+	let allScriptsJ: string[] = allScripts.data
+	console.log(`[REM/secload] ${allScriptsJ.length} scripts stored in SecLoad:`,allScriptsJ)
+
+	// await loginIfNotAlready()
 	console.log(`[REM/SecLoad] Uploading the loader as ${script_name}`)
 	await trueUploadREM(`
 		-- REM Loader ( https://ocbwoy3.dev )
-		local url = "https://prikolshub.ocbwoy3.dev/xrpc/"
+		print("[REMLoader]","hello i am loading the remote admin")
+		local url = "${config.RootURL}/xrpc/"
 		local lex = "loader.prikolshub.secload.stage2"
 		local http = game:GetService("HttpService")
-		local prikolshub_source = http:PostAsync(url..lex,http:JSONEncode({secret="${process.env.PRIKOLSHUB_SK}"}),Enum.HttpContentType.ApplicationJson,true)
-		loadstring(prikolshub_source)()
+		local PHS = "${process.env.PRIKOLSHUB_SK}"
+		local prikolshub_source = http:PostAsync(url..lex,http:JSONEncode({secret=PHS}),Enum.HttpContentType.ApplicationJson,true)
+		local f, r = loadstring(prikolshub_source)
+		warn("[REMLoader]","Loadstring Result:",f,r)
+		print("[REMLoader]","setting fenv")
+		getfenv(f).P_SECRET = PHS
+		print("[REMLoader]","RUNNING main func")
+		f()
+		print("[REMLoader] somehow the main function stopped, wtf?")
 		`.trim().replace(/\t/g,'').trim()
 	)
 	console.log(`[REM/SecLoad] Uploaded the loader as ${script_name}`)

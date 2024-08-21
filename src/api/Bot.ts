@@ -200,7 +200,7 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
 					const forum: ForumChannel = (await client.channels.fetch(config.SessionForumChannelId) as ForumChannel);
 
 					// download the thumbnail
-					const filepath = await downloadFile(session.thumbnailUrl, `${tmpdir()}/prikolshub-temp-${Date.now()}.png`);
+					const filepath = await downloadFile(session.thumbnailUrl, `${tmpdir()}/rem-temp-${Date.now()}.png`);
 
 					const thread: ThreadChannel = await forum.threads.create({
 						name: `${session.JobId.slice(0,5)} - ${session.GameName.slice(0,30)}`,

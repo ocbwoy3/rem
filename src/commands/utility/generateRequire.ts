@@ -36,7 +36,7 @@ module.exports = {
 			return
 		}
 
-		await interaction.deferReply({ephemeral:false, fetchReply: true})
+		await interaction.deferReply({ephemeral:true, fetchReply: true})
 
 		const username: string = await getUsername(interaction.user.id)
 
@@ -47,6 +47,6 @@ module.exports = {
 
 		const require = await generateRequire(username)
 
-		await interaction.followUp({ content: `\`\`\`lua\n${require}\n\`\`\`` })
+		await interaction.followUp({ content: `\`\`\`lua\n${require}\n\`\`\``, ephemeral: true })
 	},
 };

@@ -6,3 +6,5 @@ dist/
 prisma/migrations
 prisma/dev.db
 prisma/prod.db
+
+config.json

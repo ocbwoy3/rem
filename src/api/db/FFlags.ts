@@ -15,7 +15,7 @@ export async function GetFFlag(fflag: string): Promise<boolean> {
 	return (flagdata as FFlag).state
 }
 
-async function GetFFlagUnsafe(fflag: string): Promise<boolean|null> {
+export async function GetFFlagUnsafe(fflag: string): Promise<boolean|null> {
 	try {
 		const flagdata: FFlag | null = await prisma.featureFlag.findFirst({
 			where: {
