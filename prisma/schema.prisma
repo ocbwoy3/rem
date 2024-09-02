@@ -15,12 +15,13 @@ model User {
 	isAdmin         Boolean  @default(false)
 	Coins           Int      @default(0)
 	RobloxUsername  String   @default("REM_UNDEFINED_USERNAME")
+	isAnonymous     Boolean  @default(false)
 }
 
 model PrikolsHubServiceBan {
-	discordUserId  String  @unique
+	discordUserId  String  @id @unique
 	reason         String
-	moderatorId    String           // discord userid of the moderator
+	moderatorId    String              // discord userid of the moderator
 }
 
 model FeatureFlag {

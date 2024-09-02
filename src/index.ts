@@ -1,3 +1,7 @@
+const cl = console.log; const cw = console.warn; const ce = console.error
+console.log = function(x) { cl("[STDOUT]",x) }; console.warn = function(x) { cw("[STDOUT]",x) }; console.error = function(x) { ce("[STDOUT]",x) }
+
+
 import { configDotenv } from "dotenv";
 configDotenv()
 
@@ -20,7 +24,7 @@ import { setCookie } from "noblox.js";
 
 import * as server from "./api/Server"
 import { prisma } from "./api/db/Prisma";
-import { InitFFlags } from "./api/db/FFlags";
+import { GetFFlag, InitFFlags } from "./api/db/FFlags";
 
 const client: Client = djs_client
 
@@ -53,7 +57,7 @@ if ( config.LogStartup == true) {
 client.on('ready',async()=>{
 	console.log("[REM/Roblox] Authenticating with ROBLOSECURITY token")
 	const userinfo = await setCookie(process.env.ROBLOSECURITY as string)
-	console.log(`[REM/Roblox] Logged in using token as ${userinfo.UserName} (${userinfo.UserID})`)
+	console.log(`[REM/Roblox] Logged in using token as ${userinfo.name} (${userinfo.id})`)
 	await Runtime.setup()
 	// await Runtime.createSession(11195100561,'d9b93c64-f1cd-41ce-ab05-7c33912fa688','128.116.63.71')
 	server.startApp()
@@ -97,6 +101,7 @@ signals.forEach((signal:string)=>{
 
 const StartREM = async()=>{
 	await InitFFlags()
+
 	console.log("[REM/Runtime] Logging into Discord")
 	client.login(process.env.TOKEN)
 }

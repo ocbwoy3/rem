@@ -109,3 +109,29 @@ export async function setUsername(userId: string, newUsername: string): Promise<
 	if (!usernameSet) return "REM_UNDEFINED_USERNAME";
 	return usernameSet.RobloxUsername
 }
+
+export async function getAnonymous(userId: string): Promise<boolean> {
+	if (!(await userExists(userId))) await createUser(userId);
+	const wtf: {isAnonymous: boolean} = (await prisma.user.findFirst({
+		where: {
+			discordUserId: { equals: userId }
+		},
+		//cacheStrategy: { swr: 5, ttl: 5 },
+	}) as any)
+	if (!wtf) return false;
+	return wtf.isAnonymous
+}
+
+export async function setAnonymous(userId: string, newAnonymous: boolean): Promise<boolean> {
+	if (!(await userExists(userId))) await createUser(userId);
+	const wtf: {isAnonymous: boolean} = (await prisma.user.update({
+		where: {
+			discordUserId: userId
+		},
+		data: {
+			isAnonymous: newAnonymous
+		}
+	}) as any)
+	if (!wtf) return newAnonymous;
+	return wtf.isAnonymous;
+}

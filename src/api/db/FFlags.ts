@@ -6,6 +6,8 @@ export type FFlag = {name: string, state: boolean}
 
 const AllFFlags: FFlagDoc = AllFFlagsOld
 
+export const AllFFlagDoc = AllFFlags
+
 export async function GetFFlag(fflag: string): Promise<boolean> {
 	const flagdata: FFlag | null = await prisma.featureFlag.findFirst({
 		where: {

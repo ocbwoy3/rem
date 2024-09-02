@@ -32,7 +32,7 @@ import { Session } from "./Session";
 import { downloadFile } from "./Utility";
 import { tmpdir } from "node:os";
 import { message } from "noblox.js";
-import { checkUserModStatus, ModerationReport } from "./db/Prisma";
+import { checkUserModStatus, getAnonymous, ModerationReport } from "./db/Prisma";
 
 const intents = [
 	GatewayIntentBits.Guilds,
@@ -136,11 +136,19 @@ client.on(Events.MessageCreate, async(message: Message) => {
 		if (cont.length > 2000) return;
 		if (cont.length === 0) return;
 		
-		await ses.queueMessage(
-			(message.author.displayName.slice(0,50) || "rem_undefined_nick"),
-			(message.member?.displayHexColor.slice(1) || "ff0000"),
-			cont
-		)
+		if (await getAnonymous(message.author.id)) {
+			await ses.queueMessage(
+				"Anonymous",
+				"ff0000",
+				cont
+			)
+		} else {
+			await ses.queueMessage(
+				(message.author.displayName.slice(0,50) || "rem_undefined_nick"),
+				(message.member?.displayHexColor.slice(1) || "ff0000"),
+				cont
+			)
+		}
 	} catch(e_) {
 		console.error(e_)
 	}
@@ -257,9 +265,9 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
 			} catch (error) {
 				console.error(error);
 				if (interaction.replied || interaction.deferred) {
-					await interaction.followUp({ content: `\`\`\`\n${error}\n\`\`\``, ephemeral: true });
+					await interaction.followUp({ content: `REM encountered an error, report it at https://github.com/ocbwoy3/rem (unless this is a fork) \n\`\`\`\n${error}\n\`\`\``, ephemeral: true });
 				} else {
-					await interaction.reply({ content: `\`\`\`\n${error}\n\`\`\``, ephemeral: true });
+					await interaction.reply({ content: `REM encountered an error, report it at https://github.com/ocbwoy3/rem (unless this is a fork) \n\`\`\`\n${error}\n\`\`\``, ephemeral: true });
 				}
 			}
 
@@ -268,9 +276,9 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
 			if (interaction.isAutocomplete()) return;
 			try {
 				if (interaction.replied || interaction.deferred) {
-					await interaction.followUp({ content: `\`\`\`\n${e_}\n\`\`\``, ephemeral: true });
+					await interaction.followUp({ content: `REM encountered an error, report it at https://github.com/ocbwoy3/rem (unless this is a fork) \n\`\`\`\n${e_}\n\`\`\``, ephemeral: true });
 				} else {
-					await interaction.reply({ content: `\`\`\`\n${e_}\n\`\`\``, ephemeral: true });
+					await interaction.reply({ content: `REM encountered an error, report it at https://github.com/ocbwoy3/rem (unless this is a fork) \n\`\`\`\n${e_}\n\`\`\``, ephemeral: true });
 				}
 			} catch {}
 		}

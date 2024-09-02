@@ -5,13 +5,15 @@ import {
 	InteractionDeferReplyOptions,
 	Client,
 	APIEmbed,
-	Attachment
+	Attachment,
+	APIEmbedField
 } from "discord.js";
 import { banUser, getUserAdmin, setUserAdmin, unbanUser } from "../../api/db/Prisma";
 import { rm, rmSync } from "node:fs";
 import { downloadFile } from "../../api/Utility";
 import { BotOwner, RootURL } from "../../../config.json";
-import { GetFFlag, GetFFlagUnsafe, SetFFlag } from "../../api/db/FFlags";
+import { AllFFlagDoc, FFlagDoc, GetAllFFlags, GetFFlag, GetFFlagUnsafe, SetFFlag } from "../../api/db/FFlags";
+import e from "express";
 
 module.exports = {
 	moderation_bypass: true,
@@ -181,8 +183,37 @@ module.exports = {
 				}
 				switch (subcommand) {
 					case "list": {
-						await interaction.followUp({ content: `FFlag doc: ${RootURL}/api/fflag_doc.json\nALL FFlags: ${RootURL}/api/fflags.json` })
-						return
+						let fields: APIEmbedField[] = [];
+					
+						const doc: FFlagDoc = AllFFlagDoc;
+						const fflags = await GetAllFFlags();
+					
+						Object.keys(doc).forEach((name: string) => {
+							const docdesc = doc[name].desc;
+							const docdef = doc[name].default;
+							const doccur = fflags[name];
+							fields.push({ name: `${name} (${doccur}, D: ${docdef})`, value: docdesc, inline: false } as APIEmbedField);
+						});
+					
+						let AllEmbeds: APIEmbed[] = [];
+					
+						while (fields.length > 0) {
+							let f: APIEmbedField[] = [];
+							for (let i = 0; i < 4 && fields.length > 0; i++) {
+								f.push(fields.shift()!);
+							}
+							let embed: APIEmbed = {
+								color: 0xff0000,
+								fields: f
+							};
+							AllEmbeds.push(embed);
+						}
+					
+						AllEmbeds[0].title = "FFlag Doc";
+						AllEmbeds[0].description = `This is a list of FFlags. You can view all of their meanings at ${RootURL}/api/fflag_doc.json`;
+					
+						await interaction.followUp({ embeds: AllEmbeds });
+						return;
 					}
 					case "set": {
 						const fflag = (interaction.options.get('fflag') as any).value

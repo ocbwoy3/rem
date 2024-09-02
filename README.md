@@ -24,4 +24,6 @@ Add `run.sh` to PM2 or a systemd service.
 
 As previously mentioned in [Get Started](#get-started), you can run REM using PM2 or with a systemd service.
 
+For an easier setup process, run `npm run setup`.
+
 However if you plan on hosting it, I recommend you to use cloudflared to allow external connections (If you don't have port forwarding). You must also specify `RootURL` in `config.json`, however DO NOT append `/xrpc` to the URL, so it's something like `https://df721e.us-east.host.ocbwoy3.dev`. 

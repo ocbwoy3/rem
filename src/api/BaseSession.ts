@@ -72,6 +72,10 @@ export class BaseSession implements SessionData {
 		// TODO: Figure out an alternative in prod
 		console.log(`[REM/Chat] (${this.JobId.slice(0,5)}) Session Accepted - ${this.GameName}`)
 		this.SessionAccepted = true
+
+		if (await GetFFlag("DFFlagPlaySoundOnNewSession")) {
+			process.stdout.write("\u0007");	
+		}
 	}
 
 	/**

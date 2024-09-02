@@ -9,7 +9,7 @@ import * as Sentry from "@sentry/node";
 import { GetAllFFlags } from "./db/FFlags";
 
 export const app = express()
-console.log(`[REM/Sentry] Set up Express error handler.`)
+console.log(`[REM/Sentry] Set up Express error handler`)
 Sentry.setupExpressErrorHandler(app)
 
 /*
