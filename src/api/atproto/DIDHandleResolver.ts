@@ -9,7 +9,7 @@ export async function resolveHandleToDid(handle:string): Promise<string> {
 	const did: string|undefined = await hdlres.resolve(handle)
 
 	if (did == undefined) {
-		throw new Error('Expected handle to resolve')
+		throw new Error('Invalid handle (cannot find DID document)')
 	}
 
 	const doc = await didres.resolve(did)
@@ -28,7 +28,7 @@ export async function resolveHandleAtprotoData(handle:string): Promise<AtprotoDa
 	const did: string|undefined = await hdlres.resolve(handle)
 
 	if (did == undefined) {
-		throw new Error('Expected handle to resolve')
+		throw new Error('Invalid handle (cannot find DID document)')
 	}
 
 	const doc = await didres.resolve(did)
@@ -42,6 +42,5 @@ export async function resolveHandleAtprotoData(handle:string): Promise<AtprotoDa
 	return data
 
 }
-
 
 console.warn(`[REM/atproto] Loaded DID Handle resolver`);

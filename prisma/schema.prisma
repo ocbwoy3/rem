@@ -16,6 +16,8 @@ model User {
 	Coins           Int      @default(0)
 	RobloxUsername  String   @default("REM_UNDEFINED_USERNAME")
 	isAnonymous     Boolean  @default(false)
+	atprotoDid      String   @unique
+	atprotoHandle   String   @unique
 }
 
 model PrikolsHubServiceBan {

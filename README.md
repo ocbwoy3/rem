@@ -1,7 +1,7 @@
 # REM
 The PrikolsHub Killer.
 
-**REM is built and tested on Linux, support for Windows is not guaranteed.**
+REM is built and tested on Linux, I will not be adding Windows support.
 
 ## Get started
 
@@ -10,7 +10,7 @@ The PrikolsHub Killer.
 
 Copy the template `.env.template` to `.env` with `cp .env.example .env`, then configure it. Also do the same with `config_default.json -> config.json`.
 
-You must enable Developer Mode in Discord's settings, in order to be able to copy Channel IDs.
+You must enable Developer Mode in Discord's settings in order to be able to copy Channel IDs.
 
 After all of that, run the provided `post_update.sh`, which will install all dependencies, configure the database, then build it.
 
@@ -26,4 +26,7 @@ As previously mentioned in [Get Started](#get-started), you can run REM using PM
 
 For an easier setup process, run `npm run setup`.
 
-However if you plan on hosting it, I recommend you to use cloudflared to allow external connections (If you don't have port forwarding). You must also specify `RootURL` in `config.json`, however DO NOT append `/xrpc` to the URL, so it's something like `https://df721e.us-east.host.ocbwoy3.dev`. 
+However if you plan on hosting it, I recommend you to use cloudflared to allow external connections (If you don't have port forwarding). You must also specify `RootURL` in `config.json`, however DO NOT append `/xrpc` to the URL, so it's something like `https://df721e.us-east.host.ocbwoy3.dev`
+
+## How to setup Handles
+
