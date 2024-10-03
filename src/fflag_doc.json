@@ -18,5 +18,13 @@
 	"DFFlagPlaySoundOnNewSession": {
 		"desc": "Plays a beep sound on the current device running REM when a new session is created. (Does not work)",
 		"default": false
+	},
+	"DFFlagDeadtru": {
+		"desc": "Disable Skidtru AI",
+		"default": false
+	},
+	"DFFlagSkidtruLLamaGuard": {
+		"desc": "Runs Skidtru's responses trough llamaguard",
+		"default": true
 	}
 }

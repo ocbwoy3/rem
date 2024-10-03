@@ -56,6 +56,7 @@ async function dotEnv(): Promise<void> {
 	
 	const discord: string = await ask("Enter your bot's token:");
 	const discordApp: string = await ask("Enter your bot's App ID:");
+	const groqKey: string = await ask("Enter your Groq API key:","https://console.groq.com/keys");
 	
 	let secload_key = "";
 	try {
@@ -97,6 +98,7 @@ ROBLOSECURITY=${roblosecurity}
 PRIKOLSHUB_SK="${prikolshub_sk}"
 SECLOAD_KEY=${secload_key}
 SENTRY_DSN=SENTRY_DSN
+GROQ_KEY="${groqKey}"
 # You can put your own Sentry DSN here, however REM would work perfectly fine without it.
 
 # Don't touch this unless you know what you're doing!
@@ -114,8 +116,8 @@ async function configJson(): Promise<void> {
 	const requestId: string = await ask("Enter your session request channel's ID:", "This will be used for session requests. (Regular channel)");
 	const forumId: string = await ask("Enter your session channel's ID:", "This will be used for sessions. (Forum channel)");
 	const rootUrl: string = await ask("Enter the URL your REM instance is hosted:", "This will be used to point the script to your REM instance.)\nThis looks something like: https://yourdomainhere.tld - This supports IP addresses (HTTP-Only) and subdomains. (Do not end with a slash!)");
-	const atprotoUrl: string = await ask("Enter the URL where usernames are gonna go:", "Kinda similar to Bluesky. WILL ONLY WORK WITH For example with ocbwoy3.dev, put *.ocbwoy3.dev");
-	
+	const atprotoUrl: string = await ask("Enter the URL where usernames are gonna go:", "Kinda similar to Bluesky. WILL ONLY WORK WITH WILDCARD. For example with ocbwoy3.dev, put *.ocbwoy3.dev");
+
 	const jd = JSON.stringify({
 		"BotOwner": ownerId,
 		"GuildId": guildId,
@@ -126,6 +128,7 @@ async function configJson(): Promise<void> {
 		"LogStartup": false,
 		"RootURL": rootUrl,
 		"atproto_url": atprotoUrl
+
 	},undefined,"\t");
 	
 	writeFileSync("./config.json",jd);

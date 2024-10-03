@@ -1,11 +1,16 @@
 rm -r dist
 npm i
+
+npm run build
+node dist/src/setup.js
+clear
+
 npx prisma generate
+trap "prisma generate" EXIT
 npx prisma migrate dev --name dev
+trap "prisma migrate dev --name dev" EXIT
 npm run build
 
-node dist/src/setup.js
-npm run build
 clear
 
 printf "REM has been sucessfully installed!\n"

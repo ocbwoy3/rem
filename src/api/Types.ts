@@ -44,3 +44,9 @@ export interface XRPCContext {
 	req: express.Request
 	res: express.Response
 }
+
+export type SkidtruMessage = {
+	role: "system" | "user" | "assistant",
+	name?: string,
+	content: string
+}

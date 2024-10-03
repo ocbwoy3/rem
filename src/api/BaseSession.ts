@@ -24,8 +24,8 @@ export class BaseSession implements SessionData {
 	public thumbnailUrl: string = ""
 	public gameUrl: string = "";
 
-	private QueuedDiscordMessages: QueuedDiscordMessage[] = []
-	private SessionPlayers: SessionPlayer[] = []
+	protected QueuedDiscordMessages: QueuedDiscordMessage[] = []
+	protected SessionPlayers: SessionPlayer[] = []
 
 	constructor(placeId:number,jobId:string,ipAddress:string) {
 		this.PlaceId = placeId

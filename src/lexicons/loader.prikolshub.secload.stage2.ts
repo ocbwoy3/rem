@@ -52,7 +52,7 @@ async function method(ctx: XRPCContext) {
 		if (ci.secret === process.env.PRIKOLSHUB_SK) {} else {
 			return {
 				encoding: 'text/plain',
-				body: `local deb=game:GetService("Debris") local h=Instance.new("Message",workspace) h.Text=("REM failed to load:\\n\\nLoad Secret Mismatched\\n\\nIn file src/lexicons/loader.prikolshub.secload.stage2.ts") deb:addChild(h,5)`
+				body: `error("Load Secret Mismatched",0)`
 			}
 		};
 

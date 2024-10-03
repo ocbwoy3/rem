@@ -16,11 +16,11 @@ module.exports = {
 		.setDescription('Use the AT Protocol')
 
 		.addSubcommandGroup(group => group
-			.setName("resolve")
+			.setName("identity")
 			.setDescription("Resolve information")
 			
 			.addSubcommand(subcommand => subcommand
-				.setName("data")
+				.setName("resolve")
 				.setDescription("Resolve atproto data from a handle")
 				.addStringOption(handle=>handle
 					.setName("handle")
@@ -30,11 +30,11 @@ module.exports = {
 			)
 			
 			.addSubcommand(subcommand => subcommand
-				.setName("did")
-				.setDescription("Resolve did from a handle")
+				.setName("change_handle")
+				.setDescription("Changes your atproto handle in the db")
 				.addStringOption(handle=>handle
-					.setName("handle")
-					.setDescription("The handle to resolve")
+					.setName("new_handle")
+					.setDescription("Your new handle")
 					.setRequired(true)
 				)
 			)
@@ -48,9 +48,9 @@ module.exports = {
 		// console.log(`atproto ${subcommandG} ${subcommand}`)
 
 		let embed: APIEmbed = {
-			title: "locale.error.atproto_command_restricted.title",
-			description: `locale.error.atproto_command_restricted.text`.replace(/\t/g,'').replace(/\n/g,' ').trim(),
-			color: 0xff0000
+			title: ":warning: Work in Progress",
+			description: `This feature is work in progress. You can contribute at https://github.com/ocbwoy3/rem`.replace(/\t/g,'').replace(/\n/g,' ').trim(),
+			color: 0xffff00
         }
 
         // did:plc:s7cesz7cr6ybltaryy4meb6y
@@ -59,17 +59,27 @@ module.exports = {
 			await interaction.reply({ embeds: [embed], ephemeral: true })
 		}
 
+		/*
+
+		# Success!
+
+		If you are using a custom domain, you'll need to add a TXT record in your domain's DNS panel:
+		Name: `_atproto.ocbwoy3.dev`
+		Type: `TXT`
+		Content: `did=did:plc:s7cesz7cr6ybltaryy4meb6y`
+		
+		If you are unable to add a DNS record, you can add a file to your site instead:
+		Path: `https://ocbwoy3.dev/.well-known/atproto-did`
+		Content: `did:plc:s7cesz7cr6ybltaryy4meb6y`
+		
+		*/
+
 		switch (subcommandG) {
-			case "resolve": {
+			case "identity": {
 				switch (subcommand) {
-					case "data": {
+					case "resolve": {
 						const data: AtprotoData = await resolveHandleAtprotoData(interaction.options.get('handle')?.value as string)
 						await interaction.reply({ content: `\`\`\`\n${JSON.stringify(data,null,"\t")}\n\`\`\`` })
-						return
-					}
-					case "did": {
-						const data: AtprotoData = await resolveHandleAtprotoData(interaction.options.get('handle')?.value as string)
-						await interaction.reply({ content: data.did })
 						return
 					}
 					default: { await interaction.reply({ content:"unknown subcommand" }) }

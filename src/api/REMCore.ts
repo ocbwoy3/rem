@@ -1,4 +1,4 @@
-import { ActionRow, ActionRowBuilder, Attachment, ButtonBuilder, ButtonStyle, Client, NewsChannel, RawFile, TextChannel } from "discord.js";
+import { ActionRow, ActionRowBuilder, APIEmbed, APIEmbedField, Attachment, ButtonBuilder, ButtonStyle, Client, NewsChannel, RawFile, TextChannel } from "discord.js";
 import { Session } from "./Session";
 import * as config from "../../config.json";
 import { downloadFile } from "./Utility";
@@ -76,18 +76,30 @@ export class REMRuntime {
 			.setLabel('Decline')
 			.setStyle(ButtonStyle.Danger);
 
+		const join_session = new ButtonBuilder()
+			.setLabel('Roblox')
+			.setURL(newSession.gameUrl)
+			.setStyle(ButtonStyle.Link);
+
 		const row = new ActionRowBuilder()
-			.addComponents(accept_session, decline_session);
+			.addComponents(accept_session, decline_session, join_session);
 
 		// download the thumbnail
 		const filepath = await downloadFile(newSession.thumbnailUrl,`${tmpdir()}/rem-temp-${Date.now()}.png`)
 
+		let embed: APIEmbed = {
+			title: newSession.GameName,
+			color: 0x00ff00,
+			fields: [
+				({name:"Job ID",value:jobId,inline:false} as APIEmbedField),
+				({name:"IP Address",value:ipAddress,inline:false} as APIEmbedField)
+			]
+		}
+		
 		await this.SessionRequestsChannel?.send({
-			content: `# [\`${newSession.GameName}\`]( <${newSession.gameUrl}> )
-			**Job Id:** \`${jobId}\`
-			**Server IP:** \`${ipAddress}\``.replace(/\t/g,''),
 			components: ([row] as any),
-			files: [filepath]
+			files: [filepath],
+			embeds: [embed]
 		})
 
 		await new Promise(f => setTimeout(f, 10000));

@@ -3,8 +3,11 @@ dist/
 .env
 .sentryclirc
 
+.direnv/
+flake.lock
+
 prisma/migrations
-prisma/dev.db
-prisma/prod.db
+prisma/*.db
+prisma/*.db-journal
 
 config.json

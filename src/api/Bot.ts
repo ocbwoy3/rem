@@ -21,7 +21,10 @@ import {
 	MessagePayload,
 	Message,
 	DefaultWebSocketManagerOptions,
-	ActivityType
+	ActivityType,
+	ActionRowBuilder,
+	ButtonBuilder,
+	ButtonStyle
 } from "discord.js";
 import { CommandModuleExports } from "./Types";
 import * as fs from "node:fs";
@@ -33,6 +36,9 @@ import { downloadFile } from "./Utility";
 import { tmpdir } from "node:os";
 import { message } from "noblox.js";
 import { checkUserModStatus, getAnonymous, ModerationReport } from "./db/Prisma";
+import { GetFFlag } from "./db/FFlags";
+import { GenerateResponse } from "./skidtru/ResponseGenerator";
+import { error } from "node:console";
 
 const intents = [
 	GatewayIntentBits.Guilds,
@@ -43,7 +49,7 @@ const intents = [
 
 const { DefaultWebSocketManagerOptions: { identifyProperties }} = require("@discordjs/ws");
 
-identifyProperties.browser = "Discord iOS"; // trick for bot on mobile
+identifyProperties.browser = "https://github.com/ocbwoy3/rem"; // trick for bot on mobile
 
 export const client: any = (new Client({
 	intents: intents,
@@ -51,11 +57,16 @@ export const client: any = (new Client({
 		status: 'dnd',
 		activities: [
 			{
-				name: "REM, the real thing",
+				name: "gay remote admin :3",
 				type: ActivityType.Playing
 			}
 		]
-	}
+	},
+	ws: {
+		properties: {
+			$browser: "Discord iOS"
+		}
+	} as any
 }) as Client)
 
 async function registerCommands() {
@@ -123,6 +134,25 @@ export function setExecutionContext(newContext: REMRuntime | null): void {
 }
 
 client.on(Events.MessageCreate, async(message: Message) => {
+	if (message.author.id.toString() in Blacklist) return;
+	if (message.author.id === message.client.user.id) return;
+	if (message.webhookId) return;
+	const ses = await executionContext?.getSessionByChannelId(message.channelId)
+	// console.log('ses',ses);
+	if (!ses) return;
+	// console.log('membr',message.member)
+	const cont = message.content.trim().slice(0,2000)
+	if (cont.length > 2000) return;
+	if (cont.length === 0) return;
+	if (message.mentions.has(message.client.user)) {
+		GenerateResponse(message,ses).catch((error)=>{
+			console.error("[REM/Skidtru]","SKIDTRU GEN ERROR",error)
+			message.reply({ content: `Skidtru failed to generate, report this issue [on our GitHub](<https://github.com/ocbwoy3/rem/issues>), unless this is a fork. \n\`\`\`\n${error}\n\`\`\`` }).catch(()=>{});
+		})
+	}
+})
+
+client.on(Events.MessageCreate, async(message: Message) => {
 	try {
 		// random attempts at debugging, realizing i forgot to set the channel in the session class after init
 		// console.log(`${message.member?.nickname || message.author.displayName} - ${message.content}`);
@@ -136,7 +166,7 @@ client.on(Events.MessageCreate, async(message: Message) => {
 		if (cont.length > 2000) return;
 		if (cont.length === 0) return;
 		
-		if (await getAnonymous(message.author.id)) {
+		if ((await getAnonymous(message.author.id)) && !(await GetFFlag("DFFlagCIA"))) {
 			await ses.queueMessage(
 				"Anonymous",
 				"ff0000",
@@ -210,14 +240,29 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
 					// download the thumbnail
 					const filepath = await downloadFile(session.thumbnailUrl, `${tmpdir()}/rem-temp-${Date.now()}.png`);
 
+					const join_session = new ButtonBuilder()
+						.setLabel('Roblox')
+						.setURL(session.gameUrl)
+						.setStyle(ButtonStyle.Link);
+
+					const row = new ActionRowBuilder()
+						.addComponents(join_session);
+
+					let embed: APIEmbed = {
+						title: session.GameName,
+						color: 0x00ff00,
+						fields: [
+							({name:"Job ID",value:session.JobId,inline:false} as APIEmbedField),
+							({name:"IP Address",value:session.ServerIPAddress,inline:false} as APIEmbedField)
+						]
+					}
+
 					const thread: ThreadChannel = await forum.threads.create({
 						name: `${session.JobId.slice(0,5)} - ${session.GameName.slice(0,30)}`,
 						message: {
-							content: 
-								`# [\`${session.GameName}\`]( <${session.gameUrl}> )
-								**Job Id:** \`${session.JobId}\`
-								**Server IP:** \`${session.ServerIPAddress}\``.replace(/\t/g,''),
-							files: [filepath]
+							files: [filepath],
+							embeds: [embed],
+							components: [row] as any
 						},
 						appliedTags: []
 					});
@@ -265,9 +310,9 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
 			} catch (error) {
 				console.error(error);
 				if (interaction.replied || interaction.deferred) {
-					await interaction.followUp({ content: `REM encountered an error, report it at https://github.com/ocbwoy3/rem (unless this is a fork) \n\`\`\`\n${error}\n\`\`\``, ephemeral: true });
+					await interaction.followUp({ content: `REM encountered an error, report it [on our GitHub](<https://github.com/ocbwoy3/rem/issues>), unless this is a fork. \n\`\`\`\n${error}\n\`\`\``, ephemeral: true });
 				} else {
-					await interaction.reply({ content: `REM encountered an error, report it at https://github.com/ocbwoy3/rem (unless this is a fork) \n\`\`\`\n${error}\n\`\`\``, ephemeral: true });
+					await interaction.reply({ content: `REM encountered an error, report it [on our GitHub](<https://github.com/ocbwoy3/rem/issues>), unless this is a fork. \n\`\`\`\n${error}\n\`\`\``, ephemeral: true });
 				}
 			}
 
@@ -276,9 +321,9 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
 			if (interaction.isAutocomplete()) return;
 			try {
 				if (interaction.replied || interaction.deferred) {
-					await interaction.followUp({ content: `REM encountered an error, report it at https://github.com/ocbwoy3/rem (unless this is a fork) \n\`\`\`\n${e_}\n\`\`\``, ephemeral: true });
+					await interaction.followUp({ content: `REM encountered an error, report it [on our GitHub](<https://github.com/ocbwoy3/rem/issues>), unless this is a fork. \n\`\`\`\n${e_}\n\`\`\``, ephemeral: true });
 				} else {
-					await interaction.reply({ content: `REM encountered an error, report it at https://github.com/ocbwoy3/rem (unless this is a fork) \n\`\`\`\n${e_}\n\`\`\``, ephemeral: true });
+					await interaction.reply({ content: `REM encountered an error, report it [on our GitHub](<https://github.com/ocbwoy3/rem/issues>), unless this is a fork. \n\`\`\`\n${e_}\n\`\`\``, ephemeral: true });
 				}
 			} catch {}
 		}

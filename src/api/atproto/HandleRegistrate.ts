@@ -20,5 +20,3 @@ export const blacklistedHandles: string[] = [
 	"ocbwoy3"
 
 ]
-
-export const existingATPhandlesBluesky = []

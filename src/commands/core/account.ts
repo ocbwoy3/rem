@@ -7,7 +7,7 @@ import {
 	APIEmbed,
 	Attachment
 } from "discord.js";
-import { banUser, getUserAdmin, getUsername, setUserAdmin, setUsername, unbanUser } from "../../api/db/Prisma";
+import { banUser, getUserAdmin, getUserInfo, getUsername, setUserAdmin, setUsername, unbanUser } from "../../api/db/Prisma";
 import { rm, rmSync } from "node:fs";
 import { downloadFile } from "../../api/Utility";
 import { getGlobalRuntime, REMRuntime } from "../../api/REMCore";
@@ -38,6 +38,11 @@ module.exports = {
 				.setDescription("Your Roblox username")
 				.setRequired(false)
 			)
+		)
+		
+		.addSubcommand(subcommand => subcommand
+			.setName("info")
+			.setDescription("Gets information about your account")
 		),
 
 	// 20 chars: Exactlyy_TwentyChars
@@ -51,6 +56,19 @@ module.exports = {
 		await interaction.deferReply({ fetchReply: true, ephemeral: false})
 
 		switch (subcommand) {
+			case "info": {
+				const ai = await getUserInfo(interaction.user.id);
+				await interaction.followUp({
+					embeds: [genEmbed("Account Info",`**Roblox Username:** \`${ai.RobloxUsername}\`
+**Handle:** \`${ai.atprotoHandle}\`
+**Banned from changing handle:** ${ai.handleChangeBanned}
+**ATProto DID Identifier:** \`${ai.atprotoDid}\`
+**Skidtru Whitelist:** ${ai.skidtruWhitelist}
+**Admin:** ${ai.isAdmin}
+**Coins:** ${ai.coins}`,0x00ff00)]
+				})
+				return;
+			}
 			case "username": {
 				const newUser: string|undefined = interaction.options.get("username")?.value as string
 

@@ -103,8 +103,8 @@ module.exports = {
 		**PID:** ${process.pid}
 		**CWD:** \`${cwd()}\`
 
-		# Lexicon Registrate
-		**\`LoadedLexicons.length\`:** ${Object.keys(getMethods()).length}
+		# AT Protocol
+		**\`Loaded Lexicons\`:** ${Object.keys(getMethods()).length}
 		\`\`\`
 		${Object.keys(getMethods()).join(', ')}
 		\`\`\`

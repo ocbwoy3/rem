@@ -1,13 +1,19 @@
-import { PrikolsHubServiceBan, PrismaClient } from '@prisma/client'
+import { PrikolsHubServiceBan, PrismaClient, User } from '@prisma/client'
 import { withAccelerate } from '@prisma/extension-accelerate'
+import * as config from '../../../config.json';
+import { CreateNewDid } from '../atproto/DIDHandleResolver';
 
 export const prisma = new PrismaClient()//.$extends(withAccelerate())
 
 export async function createUser(discordUserId: string) {
+	const userDid = await CreateNewDid(config.atproto_url.replace("*",`u${discordUserId}`))
 	const user = await prisma.user.create({
 		data: {
 			discordUserId: discordUserId,
-			isAdmin: false
+			isAdmin: false,
+			atprotoHandle: config.atproto_url.replace("*",`u${discordUserId}`),
+			atprotoSigningKey: userDid.signingKey,
+			atprotoDid: userDid.serverKey
 		},
 	})
 }
@@ -38,6 +44,17 @@ export async function checkUserModStatus(userId: string): Promise<ModerationRepo
 	})
 	if (!banStatus) return null;
 	return { discordUserId: banStatus.discordUserId, reason: banStatus.reason, moderatorId: banStatus.moderatorId }
+}
+
+export async function getUserInfo(userId: string): Promise<User> {
+	if (!(await userExists(userId))) await createUser(userId);
+	const ud = (await prisma.user.findFirst({
+		where: {
+			discordUserId: { equals: userId }
+		},
+		//cacheStrategy: { swr: 5, ttl: 5 },
+	}) as any);
+	return ud
 }
 
 export async function getUserAdmin(userId: string): Promise<boolean> {

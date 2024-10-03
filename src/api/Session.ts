@@ -1,7 +1,7 @@
 import { APIEmbed, ActionRowBuilder, ButtonBuilder, ButtonStyle, Channel, ComponentType, ForumChannel, Interaction, ThreadChannel, ThreadOnlyChannel, Webhook } from "discord.js";
 import { BaseSession } from "./BaseSession";
 import * as config from "../../config.json";
-import { RobloxMessage } from "./Types";
+import { RobloxMessage, SkidtruMessage } from "./Types";
 import { getProfilePicture } from "./Utility";
 
 export interface DiscordSessionData {
@@ -12,7 +12,9 @@ export interface DiscordSessionData {
 export class Session extends BaseSession implements DiscordSessionData {
 	public channelId: string = "-2";
 	public channel?: ThreadChannel
-	private webhook?: Webhook
+	protected webhook?: Webhook
+
+	public SkidtruMessages: SkidtruMessage[] = [];
 
 	public async EndSession(): Promise<void> {
 		await this.webhook?.delete("session ended")
@@ -39,8 +41,6 @@ export class Session extends BaseSession implements DiscordSessionData {
 
 			let embed: APIEmbed = {
 				title: "Session Ended",
-				// top tier discord://-/users/1
-				// intentionally being vague about how we ban (user id's) by lying to end user so they dont know
 				description: `This session has been closed by a user. You may choose to keep or end the session. It will automatically be kept if no user action was received for 60 seconds.`,
 				color: 0x00ffff
 			}
@@ -124,11 +124,11 @@ export class Session extends BaseSession implements DiscordSessionData {
 
 		// await webhook.send({
 		// 	threadId: forumThread.id,
-		// 	username: "PrikolsHub Testing!!!!!",
-		// 	content: "prikolshub testing!!!!!!!"
+		// 	username: "usernamehere",
+		// 	content: "rem content"
 		// })
 
 		// some housekeeping here or something
-		super.AcceptSession() // TODO: Use an alternative for prod
+		super.AcceptSession() // TODO: Use a better alternative for prod
 	}
 }
