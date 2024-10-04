@@ -289,6 +289,8 @@ local main = (function()
         end
     end
     
+    task.defer(pcall,atproto.lex.com.atproto.server.describeServer)
+
     -- Main
         
     rem:HookPlayers()
