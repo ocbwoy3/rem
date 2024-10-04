@@ -36,9 +36,7 @@ async function method(ctx: XRPCContext) {
 				privacyPolicy:  "https://ocbwoy3.dev/legal",
 				sourceCode: "https://github.com/ocbwoy3/rem"
 			},
-			contact: {
-				email: "ocbwoy3@ocbwoy3.dev"
-			}
+			contact: {}
 		}
 	}
 }
