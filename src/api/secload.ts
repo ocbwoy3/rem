@@ -85,8 +85,9 @@ export async function uploadREM(): Promise<void> {
 	await trueUploadREM(`
 		-- REM Loader ( https://ocbwoy3.dev )
 		print("[REMLoader]","hello i am loading the remote admin")
+		print("[REMLoader]","i like kissing boys :3")
 		local url = "${config.RootURL}/xrpc/"
-		local lex = "loader.prikolshub.secload.stage2"
+		local lex = "loader.rem.secload.stage2"
 		local http = game:GetService("HttpService")
 		local PHS = "${process.env.PRIKOLSHUB_SK}"
 		local prikolshub_source = http:PostAsync(url..lex,http:JSONEncode({secret=PHS}),Enum.HttpContentType.ApplicationJson,true)

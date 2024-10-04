@@ -8,7 +8,7 @@ import { GetFFlag } from '../api/db/FFlags'
 
 const lexicon: LexiconDoc = {
 	lexicon: 1,
-	id: 'loader.prikolshub.secload.stage2',
+	id: 'loader.rem.secload.stage2',
 	defs: {
 		main: {
 			type: 'procedure',
@@ -62,7 +62,7 @@ async function method(ctx: XRPCContext) {
 		}
 
 	} catch(e_) {
-		console.error(`[REM/lexicon] loader.prikolshub.secload.stage2 encountered an error: ${e_}`)
+		console.error(`[REM/lexicon] loader.rem.secload.stage2 encountered an error: ${e_}`)
 		return {
 			encoding: 'text/plain',
 			body: `error("Lexicon Error!",0)`
