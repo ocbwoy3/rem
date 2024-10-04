@@ -6,9 +6,10 @@ import {
 	Client,
 	APIEmbed
 } from "discord.js";
-import { resolveHandleAtprotoData, resolveHandleToDid } from "../../api/atproto/DIDHandleResolver";
+import { resolveHandleAtprotoData, resolveHandleToDid, updateHandle } from "../../api/atproto/DIDHandleResolver";
 import { AtprotoData } from "@atproto/identity";
-import { BotOwner } from "../../../config.json";
+import { BotOwner, atproto_url } from "../../../config.json";
+import { getUserInfo, prisma } from "../../api/db/Prisma";
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -51,13 +52,11 @@ module.exports = {
 			title: ":warning: Work in Progress",
 			description: `This feature is work in progress. You can contribute at https://github.com/ocbwoy3/rem`.replace(/\t/g,'').replace(/\n/g,' ').trim(),
 			color: 0xffff00
-        }
-
-        // did:plc:s7cesz7cr6ybltaryy4meb6y
-
-        if (interaction.user.id != BotOwner) {
-			await interaction.reply({ embeds: [embed], ephemeral: true })
 		}
+
+		// did:plc:s7cesz7cr6ybltaryy4meb6y
+
+		// if (interaction.user.id != BotOwner) { await interaction.reply({ embeds: [embed], ephemeral: true }) }
 
 		/*
 
@@ -77,16 +76,66 @@ module.exports = {
 		switch (subcommandG) {
 			case "identity": {
 				switch (subcommand) {
+					case "change_handle": {
+						const new_handle = interaction.options.get('new_handle')?.value as string
+						const ud = await getUserInfo(interaction.user.id)
+
+						prisma.user.update({
+							where: {
+								discordUserId: interaction.user.id
+							},
+							data: {
+								atprotoHandle: new_handle
+							}
+						}).catch(console.error)
+						updateHandle(ud.atprotoDid,ud.atprotoPrivateKey,new_handle)
+
+						const stupid = `**Add a TXT record to your domain:**
+Name: \`_atproto.${new_handle}\`
+Type: \`TXT\`
+Content: \`did=${ud.atprotoDid}\`
+
+**Or add a file:**
+Path: \`https://${new_handle}/.well-known/atproto-did\`
+Content: \`${ud.atprotoDid}\`
+						`
+
+						let embed: APIEmbed = {
+							title: "Success",
+							description: stupid.replace(/\t/g,'').trim(),
+							color: 0x00ff00
+						}
+
+						if (new_handle.endsWith(atproto_url.replace("*",""))) {
+							let embed: APIEmbed = {
+								title: "Success",
+								description: `Your handle has been successfully changed.\nYour new handle is under \`${atproto_url}\`, the record management was successful.`,
+								color: 0x00ff00
+							}
+							return interaction.reply({ embeds: [embed], ephemeral: true });
+						}
+
+						return interaction.reply({ embeds: [embed], ephemeral: true });
+					};
 					case "resolve": {
 						const data: AtprotoData = await resolveHandleAtprotoData(interaction.options.get('handle')?.value as string)
-						await interaction.reply({ content: `\`\`\`\n${JSON.stringify(data,null,"\t")}\n\`\`\`` })
-						return
-					}
-					default: { await interaction.reply({ content:"unknown subcommand" }) }
+						let embed: APIEmbed = {
+							title: "Identity",
+							fields: [
+								{name: "Handle", inline: false, value: `\`${data.handle}\``},
+								{name: "DID", inline: false, value: `\`${data.did}\``},
+								{name: "Signing Key", inline: false, value: `\`${data.signingKey}\``},
+								{name: "PDS", inline: false, value: `\`${data.pds}\``}
+							],
+							color: 0x00ff00
+						}
+						return interaction.reply({ embeds: [embed] });
+					};
+					default: { await interaction.reply({ content:"unknown subcommand" }) };
 				}
-				return
-			}
-			default: { await interaction.reply({ content:"unknown subcommand group" }) }
+				return;
+			};
+			default: { await interaction.reply({ content:"unknown subcommand group" }) };
 		}
 	},
 };

@@ -24,21 +24,24 @@ app.get("/.well-known/atproto-did", async(req, res)=>{
 			atprotoHandle: { equals: config.atproto_url.replace("*",handlematch) }
 		}
 	})
-	if (!did) res.status(404).contentType("text/plain").send("User not found");
+	if (!did) {
+		res.status(404).contentType("text/plain").send("User not found");
+		return
+	};
 	res.contentType("text/plain").set('Cache-Control','no-store').send(did?.atprotoDid)
 });
 
 app.use((req, res, next) => {
 	const userAgent: string = req.get('user-agent')?.toLowerCase() || "googlebot";
   
-	res.set('Cache-Control','no-store')
+	// res.set('Cache-Control','no-store')
 
 	if (!userAgent.includes('googlebot')) {
 		next();
 	} else if (req.url === '/robots.txt') {
 		next();
 	} else {
-		res.status(403).send('Forbidden');
+		res.set('Cache-Control','no-store').status(403).send('Forbidden');
 	}
 });
 
@@ -54,15 +57,15 @@ app.get("/",(req,res)=>{
 })
 
 app.get("/robots.txt",(req,res)=>{
-	res.contentType("text/plain").send("User-agent: *\nDisallow: /")
+	res.set('Cache-Control','no-store').contentType("text/plain").send("User-agent: *\nDisallow: /")
 })
 
 app.get("/api/fflags.json",async(req,res)=>{
-	res.contentType("application/json").send(JSON.stringify(await GetAllFFlags(),null,4))
+	res.set('Cache-Control','no-store').contentType("application/json").send(JSON.stringify(await GetAllFFlags(),null,4))
 })
 
 app.get("/api/fflag_doc.json",async(req,res)=>{
-	res.contentType("application/json").send(JSON.stringify(FFlagDoc,null,4))
+	res.set('Cache-Control','no-store').contentType("application/json").send(JSON.stringify(FFlagDoc,null,4))
 })
 
 

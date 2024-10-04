@@ -35,7 +35,7 @@ import { Session } from "./Session";
 import { downloadFile } from "./Utility";
 import { tmpdir } from "node:os";
 import { message } from "noblox.js";
-import { checkUserModStatus, getAnonymous, ModerationReport } from "./db/Prisma";
+import { checkUserModStatus, getAnonymous, getUserInfo, ModerationReport } from "./db/Prisma";
 import { GetFFlag } from "./db/FFlags";
 import { GenerateResponse } from "./skidtru/ResponseGenerator";
 import { error } from "node:console";
@@ -248,12 +248,16 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
 					const row = new ActionRowBuilder()
 						.addComponents(join_session);
 
+					const ud = await getUserInfo(interaction.user.id)
+					
 					let embed: APIEmbed = {
 						title: session.GameName,
 						color: 0x00ff00,
 						fields: [
 							({name:"Job ID",value:session.JobId,inline:false} as APIEmbedField),
-							({name:"IP Address",value:session.ServerIPAddress,inline:false} as APIEmbedField)
+							({name:"IP Address",value:session.ServerIPAddress,inline:false} as APIEmbedField),
+							({name:"Actor DID",value:`\`${ud.atprotoDid}\``,inline:false} as APIEmbedField),
+							({name:"Actor",value:`\`@${ud.atprotoHandle}\``,inline:false} as APIEmbedField)
 						]
 					}
 
@@ -270,6 +274,10 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
 					await session.AcceptSession(thread);
 					await interaction.reply({ content: 'Accepted!', ephemeral: true });
 					try {await interaction.message.delete()} catch {}
+
+					setTimeout(() => {
+						session.queueMessage("atproto","ff0000",`Session accepted by actor @${ud.atprotoHandle}`).catch(()=>{})
+					}, 5000);
 
 					new Promise(async () => {
 						await new Promise(f => setTimeout(f, 10000));

@@ -11,16 +11,24 @@ datasource db {
 }
 
 model User {
+
 	discordUserId       String   @id @unique
-	isAdmin             Boolean  @default(false)
-	coins               Int      @default(0)
 	RobloxUsername      String   @default("REM_UNDEFINED_USERNAME")
+	
+	coins               Int      @default(0)
+	
+	isAdmin             Boolean  @default(false)
 	isAnonymous         Boolean  @default(false)
-	atprotoDid          String   @unique                             //  The DID identifier of the user
-	atprotoSigningKey   String                                       //  The atproto signing key
-	handleChangeBanned  Boolean  @default(false)
 	skidtruWhitelist    Boolean  @default(false)
+	
+	handleChangeBanned  Boolean  @default(false)
+	
 	atprotoHandle       String   @unique                             //  The handle of the user, for example: alice.ocbwoy3.dev
+	atprotoDid          String   @unique                             //  The DID identifier of the user
+	
+	atprotoSigningKey   String                                       //  The atproto signing key
+	atprotoPrivateKey   String                                       //  Private Key
+
 }
 
 model PrikolsHubServiceBan {

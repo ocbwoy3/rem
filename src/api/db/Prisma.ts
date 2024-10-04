@@ -13,7 +13,8 @@ export async function createUser(discordUserId: string) {
 			isAdmin: false,
 			atprotoHandle: config.atproto_url.replace("*",`u${discordUserId}`),
 			atprotoSigningKey: userDid.signingKey,
-			atprotoDid: userDid.serverKey
+			atprotoDid: userDid.serverKey,
+			atprotoPrivateKey: userDid.didSecret
 		},
 	})
 }
