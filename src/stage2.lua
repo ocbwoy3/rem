@@ -180,12 +180,12 @@ local main = (function()
             if d.error == "ORDER66" then
                 messaging:Do("REM","Session creation was rejected by remote server.","ff0000")
             else
-                messaging:Do("REM","Cannot establish connection to did:web:"..(atproto.root:gsub("http://",""):gsub("https://",""):gsub("/xrpc","")).." - "..tostring(d.error),"ff0000")
+                messaging:Do("REM","Cannot establish connection to did:web:"..(atproto.root:gsub("http://",""):gsub("https://",""):gsub("/xrpc",""):gsub("/","")).." - "..tostring(d.error),"ff0000")
             end
             error(d.error,0)
             return
         end
-        messaging:Do("REM","Connection established - did:web:"..(atproto.root:gsub("http://",""):gsub("https://",""):gsub("/xrpc","")),"ff0000")
+        messaging:Do("REM","Connection established - did:web:"..(atproto.root:gsub("http://",""):gsub("https://",""):gsub("/xrpc",""):gsub("/","")),"ff0000")
     end
     
     local ChatMessages = {}
@@ -211,7 +211,7 @@ local main = (function()
     local function sendConnectionWarning(what)
         if didSendWarning == true then return end
         didSendWarning = true
-        messaging:Do("REM","Cannot connect to did:web:"..(atproto.root:gsub("http://",""):gsub("https://",""):gsub("/xrpc","")).." - "..tostring(what),"ff0000")
+        messaging:Do("REM","Cannot connect to did:web:"..(atproto.root:gsub("http://",""):gsub("https://",""):gsub("/xrpc",""):gsub("/","")).." - "..tostring(what),"ff0000")
         task.defer(function()
             task.delay(30,function()
                 didSendWarning = false
