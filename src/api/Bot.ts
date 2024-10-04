@@ -276,7 +276,13 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
 					try {await interaction.message.delete()} catch {}
 
 					setTimeout(() => {
-						session.queueMessage("atproto","ff0000",`Session accepted by actor @${ud.atprotoHandle}`).catch(()=>{})
+						const instanceThing = `did:web:${config.RootURL
+							.replace("http://","")
+							.replace("https://","")
+							.replace("/","/")
+						}`
+						session.queueMessage("atproto","ff0000",`Instance DID: ${instanceThing}`).catch(()=>{})
+						session.queueMessage("atproto","ff0000",`Actor: @${ud.atprotoHandle} (${ud.atprotoDid})`).catch(()=>{})
 					}, 5000);
 
 					new Promise(async () => {
