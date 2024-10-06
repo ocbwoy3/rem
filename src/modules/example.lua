@@ -39,18 +39,18 @@ local atproto = (function()
 
 	atproto.lex = {
 		loader = {
-			prikolshub = {
+			rem = {
 				modules = {
-					listAll = lex.get("loader.prikolshub.modules.listAll")
+					listAll = lex.get("loader.rem.modules.listAll")
 				}
 			}
 		},
 		app = {
-			prikolshub = {
+			rem = {
 				session = {
-					create = lex.post("app.prikolshub.session.create"),
-					exchange = lex.post("app.prikolshub.session.exchange"),
-					getInfo = lex.get("app.prikolshub.session.getInfo")
+					create = lex.post("app.rem.session.create"),
+					exchange = lex.post("app.rem.session.exchange"),
+					getInfo = lex.get("app.rem.session.getInfo")
 				}
 			}
 		},

@@ -6,7 +6,7 @@ import { Session } from '../api/Session'
 
 const lexicon: LexiconDoc = {
 	lexicon: 1,
-	id: 'app.prikolshub.session.getInfo',
+	id: 'app.rem.session.getInfo',
 	defs: {
 		main: {
 			type: 'query',

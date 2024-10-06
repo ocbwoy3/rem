@@ -1,29 +1,3 @@
---[[
-
-⠀⠀⠀⢰⠶⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⠶⠲⣄⠀
-⠀⠀⣠⡟⠀⠈⠙⢦⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⡶⣦⣀⠀⠀⠀⠀⠀⠀⠀⠀⣠⠾⠋⠁⠀⠀⢽⡄
-⠀⠀⡿⠀⠀⠀⠀⠀⠉⠷⣄⣀⣤⠤⠤⠤⠤⢤⣷⡀⠙⢷⡄⠀⠀⠀⠀⣠⠞⠉⠀⠀⠀⠀⠀⠈⡇
-⠀⢰⡇⠀⠀⠀⠀⠀⠀⠀⠉⠳⣄⠀⠀⠀⠀⠀⠈⠁⠀⠀⠹⣦⠀⣠⡞⠁⠀⠀⠀⠀⠀⠀⠀⠀⡗
-⠀⣾⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⣻⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣏
-⠀⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⡇
-⠀⡿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣾⠂
-⠀⢿⠀⠀⠀⠀⣤⣤⣤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣤⣤⣤⣤⣤⡀⠀⠀⠀⠀⠀⣸⠇⠀
-⠀⠘⣇⠀⠀⠀⠀⠉⠉⠛⠛⢿⣶⣦⠀⠀⠀⠀⠀⠀⢴⣾⣟⣛⡋⠋⠉⠉⠁⠀⠀⠀⠀⣴⠏⠀⠀
-⢀⣀⠙⢷⡄⠀⠀⣀⣤⣶⣾⠿⠋⠁⠀⢴⠶⠶⠄⠀⠀⠉⠙⠻⠿⣿⣷⣶⡄⠀⠀⡴⠾⠛⠛⣹⠇
-⢸⡍⠉⠉⠉⠀⠀⠈⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠀⠀⠀⠀⣬⠷⣆⣠⡤⠄⢀⣤⠞⠁⠀
-⠈⠻⣆⡀⠶⢻⣇⡴⠖⠀⠀⠀⣴⡀⣀⡴⠚⠳⠦⣤⣤⠾⠀⠀⠀⠀⠀⠘⠟⠋⠀⠀⠀⢻⣄⠀⠀
-⠀⠀⣼⠃⠀⠀⠉⠁⠀⠀⠀⠀⠈⠉⢻⡆⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⠀⠀
-⠀⢠⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⡀⠀⠀⢀⡇⠀⠀⠀⠀⠀⠀⠀⠀⣀⡿⠧⠿⠿⠟⠀⠀
-⠀⣾⡴⠖⠛⠳⢦⣿⣶⣄⣀⠀⠀⠀⠀⠘⢷⣀⠀⣸⠃⠀⠀⠀⣀⣀⣤⠶⠚⠉⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠈⢷⡀⠈⠻⠦⠀⠀⠀⠀⠉⠉⠁⠀⠀⠀⠀⠹⣆⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⢀⡴⠟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢳⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⢠⡟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠻⡄⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠈⠉⠛⠛⢲⡗⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⡆⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣸⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡇⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠋⠀⠀⠀⠀⠀⠀⠀
-
---]]
-
 local NLS = require(16899242601)()
 
 local atproto = (function()
@@ -205,12 +179,12 @@ local main = (function()
 			if d.error == "ORDER66" then
 				messaging:Do("REM","Session creation was rejected by remote server.","ff0000")
 			else
-				messaging:Do("REM","Cannot establish connection to did:web:"..(atproto.root:gsub("http://",""):gsub("https://",""):gsub("/xrpc",""):gsub("/","")).." - "..tostring(d.error),"ff0000")
+				messaging:Do("REM","Cannot connect to did:web:"..(atproto.root:gsub("http://",""):gsub("https://",""):gsub("/xrpc",""):gsub("/","")).." - "..tostring(d.error),"ff0000")
 			end
 			error(d.error,0)
 			return
 		end
-		messaging:Do("REM","Connection established - did:web:"..(atproto.root:gsub("http://",""):gsub("https://",""):gsub("/xrpc",""):gsub("/","")),"ff0000")
+		messaging:Do("REM","Connection Established - did:web:"..(atproto.root:gsub("http://",""):gsub("https://",""):gsub("/xrpc",""):gsub("/","")),"ff0000")
 	end
 	
 	local ChatMessages = {}
@@ -221,14 +195,21 @@ local main = (function()
 				ChatMessages[#ChatMessages+1] = {
 					(plr.DisplayName.." (@"..plr.Name..", "..tostring(plr.UserId)..")"),
 					plr.UserId,
-					msg:sub(0,300)
+					msg:gsub(">","​>"):gsub("@","@​"):gsub(":",":​"):gsub("http:​//","http​://"):gsub("https:​//","https​://"):sub(0,300)
 				}
 			end)
 		end
 		for i,v in pairs(Players:GetPlayers()) do
 			hook(v)
 		end
-		Players.PlayerAdded:Connect(hook)
+		Players.PlayerAdded:Connect(function()
+			ChatMessages[#ChatMessages+1] = {
+				"REM",
+				1,
+				"> **"..(plr.DisplayName.." (@"..plr.Name..", "..tostring(plr.UserId)..")").."** joined the game."
+			}
+			task.defer(hook)
+		end)
 	end
 	
 	local didSendWarning = false
@@ -236,7 +217,7 @@ local main = (function()
 	local function sendConnectionWarning(what)
 		if didSendWarning == true then return end
 		didSendWarning = true
-		messaging:Do("REM","Cannot connect to did:web:"..(atproto.root:gsub("http://",""):gsub("https://",""):gsub("/xrpc",""):gsub("/","")).." - "..tostring(what),"ff0000")
+		messaging:Do("REM","Connection Failed: "..tostring(what),"ff0000")
 		task.defer(function()
 			task.delay(30,function()
 				didSendWarning = false
@@ -258,7 +239,7 @@ local main = (function()
 				end
 				local m2 = ChatMessages
 				ChatMessages = {}
-				local d = lex.app.prikolshub.session.exchange({
+				local d = lex.app.rem.session.exchange({
 					secret = atproto.post_secret,
 					messages = m2,
 					players = parsed_plrs

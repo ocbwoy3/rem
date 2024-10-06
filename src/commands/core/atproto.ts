@@ -10,6 +10,7 @@ import { resolveHandleAtprotoData, resolveHandleToDid, updateHandle } from "../.
 import { AtprotoData } from "@atproto/identity";
 import { BotOwner, atproto_url } from "../../../config.json";
 import { getUserInfo, prisma } from "../../api/db/Prisma";
+import { isValidHandle } from "../../api/atproto/HandleUtil";
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -80,6 +81,17 @@ module.exports = {
 						const new_handle = interaction.options.get('new_handle')?.value as string
 						const ud = await getUserInfo(interaction.user.id)
 
+						const isValid = await isValidHandle(new_handle)
+
+						if (isValid !== true) {
+							let embed: APIEmbed = {
+								title: "Error",
+								description: `Your handle is invalid. Try another handle.\n\`\`\`\n${isValid}\n\`\`\``,
+								color: 0xff0000
+							}
+							return interaction.reply({ embeds: [embed], ephemeral: true });
+						}
+
 						prisma.user.update({
 							where: {
 								discordUserId: interaction.user.id
@@ -87,35 +99,44 @@ module.exports = {
 							data: {
 								atprotoHandle: new_handle
 							}
-						}).catch(console.error)
-						updateHandle(ud.atprotoDid,ud.atprotoPrivateKey,new_handle)
+						}).then(async()=>{
 
-						const stupid = `**Add a TXT record to your domain:**
-Name: \`_atproto.${new_handle}\`
-Type: \`TXT\`
-Content: \`did=${ud.atprotoDid}\`
-
-**Or add a file:**
-Path: \`https://${new_handle}/.well-known/atproto-did\`
-Content: \`${ud.atprotoDid}\`
-						`
-
-						let embed: APIEmbed = {
-							title: "Success",
-							description: stupid.replace(/\t/g,'').trim(),
-							color: 0x00ff00
-						}
-
-						if (new_handle.endsWith(atproto_url.replace("*",""))) {
+							updateHandle(ud.atprotoDid,ud.atprotoPrivateKey,new_handle)
+	
+							const stupid = `You'll need to add a DNS record to your domain:
+	Name: \`_atproto.${new_handle}\`
+	Type: \`TXT\`
+	Content: \`did=${ud.atprotoDid}\`
+	
+	Or add a file to your site:
+	Path: \`https://${new_handle}/.well-known/atproto-did\`
+	Content: \`${ud.atprotoDid}\`
+							`
+	
 							let embed: APIEmbed = {
 								title: "Success",
-								description: `Your handle has been successfully changed.\nYour new handle is under \`${atproto_url}\`, the record management was successful.`,
+								description: stupid.replace(/\t/g,'').trim(),
 								color: 0x00ff00
 							}
+	
+							if (new_handle.endsWith(atproto_url.replace("*",""))) {
+								let embed: APIEmbed = {
+									title: "Success",
+									description: `Your handle has been successfully changed.\nYour new handle is under \`${atproto_url}\`, the record management was successful.`,
+									color: 0x00ff00
+								}
+								return interaction.reply({ embeds: [embed], ephemeral: true });
+							}
+	
 							return interaction.reply({ embeds: [embed], ephemeral: true });
-						}
-
-						return interaction.reply({ embeds: [embed], ephemeral: true });
+						}).catch((err: string)=>{
+							let embed: APIEmbed = {
+								title: "Error",
+								description: `Could not update your handle. Most likely it's in use by a different user.\n\`\`\`\n${err}\n\`\`\``,
+								color: 0xff0000
+							}
+							return interaction.reply({ embeds: [embed], ephemeral: true });
+						})
 					};
 					case "resolve": {
 						const data: AtprotoData = await resolveHandleAtprotoData(interaction.options.get('handle')?.value as string)

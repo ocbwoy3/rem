@@ -35,7 +35,7 @@ import * as config from "../../config.json";
 async function genExecutableCode(): Promise<string> {
 	const mainCode = (await readFile("src/stage2.lua")).toString()
 	const header = `local ROOT_URL="${config.RootURL}/xrpc/"`
-	return `-- REM, Remote Admin (https://ocbwoy3.dev)\n\n\n\n\n${header}\n\n\n${mainCode}`
+	return `-- REM, Remote Admin (https://github.com/ocbwoy3/rem)\n\n\n\n\n${header}\n\n\n${mainCode}`
 }
 
 async function method(ctx: XRPCContext) {

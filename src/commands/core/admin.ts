@@ -6,9 +6,10 @@ import {
 	Client,
 	APIEmbed,
 	Attachment,
-	APIEmbedField
+	APIEmbedField,
+	AttachmentBuilder
 } from "discord.js";
-import { banUser, getUserAdmin, setUserAdmin, unbanUser } from "../../api/db/Prisma";
+import { banUser, getUserAdmin, prisma, setUserAdmin, unbanUser } from "../../api/db/Prisma";
 import { rm, rmSync } from "node:fs";
 import { downloadFile } from "../../api/Utility";
 import { BotOwner, RootURL } from "../../../config.json";
@@ -20,6 +21,27 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('admin')
 		.setDescription('Control REM')
+
+		.addSubcommandGroup(group => group
+			.setName("db")
+			.setDescription("Manage the database")
+			
+			.addSubcommand(subcommand => subcommand
+				.setName("export")
+				.setDescription("Export the database")
+			)
+			
+			.addSubcommand(subcommand => subcommand
+				.setName("did_keypair")
+				.setDescription("Obtain a user's DID keypair.")
+				.addStringOption(did=>did
+					.setName("did")
+					.setDescription("The DID of the user")
+					.setRequired(true)
+				)
+			)
+
+		)
 
 		.addSubcommandGroup(group => group
 			.setName("perm")
@@ -109,8 +131,8 @@ module.exports = {
 
 	async execute(interaction: CommandInteraction) {
 
-		const subcommandG = (interaction.options as any).getSubcommandGroup()
-		const subcommand = (interaction.options as any).getSubcommand()
+		const subcommandG = (interaction.options as any).getSubcommandGroup();
+		const subcommand = (interaction.options as any).getSubcommand();
 
 		// console.log(`atproto ${subcommandG} ${subcommand}`)
 
@@ -122,24 +144,72 @@ module.exports = {
 
 		// did:plc:s7cesz7cr6ybltaryy4meb6y
 
-		await interaction.deferReply({ fetchReply: true, ephemeral: true})
+		await interaction.deferReply({ fetchReply: true, ephemeral: true});
 
 		switch (subcommandG) {
+			case "db": {
+				if (interaction.user.id != BotOwner) {
+					let embed2: APIEmbed = {
+						title: "Owner Only",
+						description: `You cannot access this command!`.replace(/\t/g,'').replace(/\n/g,' ').trim(),
+						color: 0xff0000
+					}
+					return interaction.followUp({ embeds: [embed2] });
+				}
+				switch (subcommand) {
+					case "export": {
+						const allUsers = await prisma.user.findMany();
+						const usersfile = new AttachmentBuilder(Buffer.from(JSON.stringify(allUsers,undefined,"\t")),{name:"SPOILER_users.json"});
+
+						const allBans = await prisma.prikolsHubServiceBan.findMany();
+						const bansfile = new AttachmentBuilder(Buffer.from(JSON.stringify(allBans,undefined,"\t")),{name:"SPOILER_bans.json"});
+
+						const allFFlags = await prisma.featureFlag.findMany();
+						const fflagsfile = new AttachmentBuilder(Buffer.from(JSON.stringify(allFFlags,undefined,"\t")),{name:"SPOILER_fflags.json"});
+
+						return interaction.followUp({
+							content: `all data from prisma db\n**DO NOT SHARE/DISTRIBUTE**`,
+							files: [usersfile, bansfile, fflagsfile]
+						});
+					}
+					case "did_keypair": {
+						const did: string = (interaction.options.get('did') as any).value
+						const ud = await prisma.user.findFirst({
+							where: {
+								atprotoDid: { equals: did }
+							}
+						})
+						if (!ud) {
+							let embed: APIEmbed = {
+								title: "Error",
+								description: `User with given DID is not in the database!`,
+								color: 0xff0000
+							}
+							return interaction.followUp({ embeds: [embed] });
+						}
+						const file = new AttachmentBuilder(Buffer.from(ud.atprotoPrivateKey),{name:"privatekey.bin"});
+						return interaction.followUp({ content: `atproto did private key (stored in current db) - \`${ud.atprotoDid}\` (\`@${ud.atprotoHandle}\`)\n**DO NOT SHARE/DISTRIBUTE**`, files: [file] });
+					}
+					default: { await interaction.followUp({ content:"unknown subcommand" }) }
+				}
+				
+				return;
+			}
 			case "moderation": {
 				if ( (await getUserAdmin(interaction.user.id)) === false) {
-					await interaction.followUp( { embeds: [embed] } )
-					return
+					await interaction.followUp( { embeds: [embed] } );
+					return;
 				} 
 				switch (subcommand) {
 					case "ban": {
-						await banUser((interaction.options.get('user') as any).value,(interaction.options.get('reason') as any).value,interaction.user.id)
-						await interaction.followUp({ content: `Sucessfully banned <@${(interaction.options.get('user') as any).value}> from REM!` })
-						return
+						await banUser((interaction.options.get('user') as any).value,(interaction.options.get('reason') as any).value,interaction.user.id);
+						await interaction.followUp({ content: `Sucessfully banned <@${(interaction.options.get('user') as any).value}> from REM!` });
+						return;
 					}
 					case "unban": {
-						await unbanUser((interaction.options.get('user') as any).value)
-						await interaction.followUp({ content: `Sucessfully unbanned <@${(interaction.options.get('user') as any).value}> from REM!` })
-						return
+						await unbanUser((interaction.options.get('user') as any).value);
+						await interaction.followUp({ content: `Sucessfully unbanned <@${(interaction.options.get('user') as any).value}> from REM!` });
+						return;
 					}
 					default: { await interaction.followUp({ content:"unknown subcommand" }) }
 				}
@@ -216,20 +286,20 @@ module.exports = {
 						return;
 					}
 					case "set": {
-						const fflag = (interaction.options.get('fflag') as any).value
-						const value = (interaction.options.get('value') as any).value
-						const current = await GetFFlagUnsafe(fflag)
+						const fflag = (interaction.options.get('fflag') as any).value;
+						const value = (interaction.options.get('value') as any).value;
+						const current = await GetFFlagUnsafe(fflag);
 						if (current === null) {
-							await interaction.followUp({ content: `FFlag doesn't exist!` })
-							return
+							await interaction.followUp({ content: `FFlag doesn't exist!` });
+							return;
 						}
 						if (current === value) {
-							await interaction.followUp({ content: `${fflag} value is already ${value}` })
-							return
+							await interaction.followUp({ content: `${fflag} value is already ${value}` });
+							return;
 						}
-						await SetFFlag(fflag,value)
-						await interaction.followUp({ content: `Success. ${fflag}: ${current} -> ${value}` })
-						return
+						await SetFFlag(fflag,value);
+						await interaction.followUp({ content: `Success. ${fflag}: ${current} -> ${value}` });
+						return;
 					}
 					default: { await interaction.followUp({ content:"unknown subcommand" }) }
 				}

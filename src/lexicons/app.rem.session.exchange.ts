@@ -6,7 +6,7 @@ import { Session } from '../api/Session';
 
 const lexicon: LexiconDoc = {
 	lexicon: 1,
-	id: 'app.prikolshub.session.exchange',
+	id: 'app.rem.session.exchange',
 	defs: {
 		main: {
 			type: 'procedure',

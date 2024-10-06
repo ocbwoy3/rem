@@ -35,7 +35,7 @@ const boykisser = `
 
 const lexicon: LexiconDoc = {
 	lexicon: 1,
-	id: 'loader.prikolshub.modules.listAll',
+	id: 'loader.rem.modules.listAll',
 	defs: {
 		main: {
 			type: 'query',

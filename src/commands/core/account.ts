@@ -62,7 +62,7 @@ module.exports = {
 					embeds: [genEmbed("Account Info",`**Roblox Username:** \`${ai.RobloxUsername}\`
 **Handle:** \`${ai.atprotoHandle}\`
 **Banned from changing handle:** ${ai.handleChangeBanned}
-**ATProto DID Identifier:** \`${ai.atprotoDid}\`
+**DID:** \`${ai.atprotoDid}\`
 **Skidtru Whitelist:** ${ai.skidtruWhitelist}
 **Admin:** ${ai.isAdmin}
 **Coins:** ${ai.coins}`,0x00ff00)]
