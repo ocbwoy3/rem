@@ -45,8 +45,8 @@ app.use((req, res, next) => {
 	}
 });
 
-let cachedGitBranchName = "unknown";
-let gitCommitHash = readFileSync(".git/ORIG_HEAD").toString().trim().substring(0,8)
+export let cachedGitBranchName = "unknown";
+export let gitCommitHash = readFileSync(".git/ORIG_HEAD").toString().trim().substring(0,8)
 
 exec("git branch --show-current",(_,stdout:string)=>{
 	cachedGitBranchName = stdout.trim()

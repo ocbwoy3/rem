@@ -84,7 +84,6 @@ export async function uploadREM(): Promise<void> {
 	console.log(`[REM/SecLoad] Uploading the loader as ${script_name}`)
 	await trueUploadREM(`
 		-- REM Loader ( https://ocbwoy3.dev )
-		print("[REMLoader]","hello i am loading the remote admin")
 		print("[REMLoader]","i like kissing boys :3")
 		local url = "${config.RootURL}/xrpc/"
 		local lex = "loader.rem.secload.stage2"
@@ -92,12 +91,11 @@ export async function uploadREM(): Promise<void> {
 		local PHS = "${process.env.PRIKOLSHUB_SK}"
 		local prikolshub_source = http:PostAsync(url..lex,http:JSONEncode({secret=PHS}),Enum.HttpContentType.ApplicationJson,true)
 		local f, r = loadstring(prikolshub_source)
-		warn("[REMLoader]","Loadstring Result:",f,r)
+		warn("[REMLoader]","loadstring :3",r)
 		print("[REMLoader]","setting fenv")
 		getfenv(f).P_SECRET = PHS
-		print("[REMLoader]","RUNNING main func")
-		f()
-		print("[REMLoader] somehow the main function stopped, wtf?")
+		print("[REMLoader]","DEFERING main func")
+		task.defer(function() f()() print("[REMLoader] main stopped") end)
 		`.trim().replace(/\t/g,'').trim()
 	)
 	console.log(`[REM/SecLoad] Uploaded the loader as ${script_name}`)

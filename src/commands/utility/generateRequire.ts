@@ -9,6 +9,7 @@ import {
 import { generateRequire, uploadREM } from "../../api/secload";
 import { getUsername } from "../../api/db/Prisma";
 import { GetFFlag } from "../../api/db/FFlags";
+import { addToLog } from "../../api/Bot";
 
 uploadREM()
 
@@ -46,6 +47,7 @@ module.exports = {
 		}
 
 		const require = await generateRequire(username)
+		addToLog("Require Generated",{user: interaction.user, code: `\`\`\`lua\n${require.slice(0,250)}\n\`\`\`` });
 
 		await interaction.followUp({ content: `\`\`\`lua\n${require}\n\`\`\``, ephemeral: true })
 	},

@@ -11,6 +11,7 @@ import { AtprotoData } from "@atproto/identity";
 import { BotOwner, atproto_url } from "../../../config.json";
 import { getUserInfo, prisma } from "../../api/db/Prisma";
 import { isValidHandle } from "../../api/atproto/HandleUtil";
+import { addToLog } from "../../api/Bot";
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -100,8 +101,9 @@ module.exports = {
 								atprotoHandle: new_handle
 							}
 						}).then(async()=>{
+							addToLog("Handle Changed",{user: interaction.user, oldHandle: ud.atprotoHandle, newHandle: new_handle});
 
-							updateHandle(ud.atprotoDid,ud.atprotoPrivateKey,new_handle)
+							updateHandle(ud.atprotoDid,ud.atprotoPrivateKey,new_handle);
 	
 							const stupid = `You'll need to add a DNS record to your domain:
 	Name: \`_atproto.${new_handle}\`

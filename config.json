@@ -5,7 +5,7 @@
 	"SessionRequestsChannelId": "1256308256624742483",
 	"SessionForumChannelId": "1256308151804887150",
 	"Blacklist": {},
-	"LogStartup": false,
+	"LogStartup": true,
 	"RootURL": "https://labs.ocbwoy3.dev",
 	"atproto_url": "*.ocbwoy3.dev"
 }

@@ -5,6 +5,7 @@ import { downloadFile } from "./Utility";
 import { tmpdir } from "os";
 import * as fs from 'node:fs';
 import { GetFFlag } from "./db/FFlags";
+import { addToLog } from "./Bot";
 
 export class REMRuntime {
 
@@ -95,7 +96,9 @@ export class REMRuntime {
 				({name:"IP Address",value:ipAddress,inline:false} as APIEmbedField)
 			]
 		}
-		
+
+		addToLog("Session Request",{session:newSession,ipAddress:newSession.ServerIPAddress},0x00ff00)
+
 		await this.SessionRequestsChannel?.send({
 			components: ([row] as any),
 			files: [filepath],

@@ -37,7 +37,7 @@
 	"privacy": {
 		"gdpr": {
 			"title": "GDPR",
-			"description": "REM is made in Latvia (a country in the EU) so we must protect your information, as required by the European Union's General Data Protection Regulation (GDPR). You can ask to see what information we have about you, stop us from sharing it with others, or ask us to delete it. By clicking below, you agree that you live in the European Union or California.",
+			"description": "REM is made in Latvia (a country in the EU) so we must protect your information, as required by the European Union's General Data Protection Regulation (GDPR). You can ask to see what information we have about you, stop us from sharing it with others, or ask us to delete it. By clicking below, you agree that you live in the European Union.",
 			"deny_terms_button": "Delete my Data",
 			"request_data_button": "Request my Data",
 			"request_stop_sharing_button": "Stop Sharing"
@@ -50,7 +50,7 @@
 		},
 		"gdpr_request_data": {
 			"title": "Request your data",
-			"description": "If you click \"Request my Data\", we will DM you your data export. The JSON file associated with your data will include your coins, level, account information and moderation status. However, your data export will not contain the access and refresh tokens for our app, as it is sensitive information and is vital for REM to function. **Please make sure the bot can DM you!**",
+			"description": "If you click \"Request my Data\", we will DM you your data export. The JSON file associated with your data will include your coins, DID and Roblox username. However, it will not include the Authorization Tokens and DID private keys associated with your account. Please make sure the bot can DM you.",
 			"confirm_button": "Request my Data",
 			"cancel_button": "Cancel"
 		},

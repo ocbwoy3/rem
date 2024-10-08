@@ -1,5 +1,5 @@
-const cl = console.log; const cw = console.warn; const ce = console.error
-console.log = function(x) { cl("[STDOUT]",x) }; console.warn = function(x) { cw("[STDOUT]",x) }; console.error = function(x) { ce("[STDOUT]",x) }
+// const cl = console.log; const cw = console.warn; const ce = console.error
+// console.log = function(x) { cl("[STDOUT]",x) }; console.warn = function(x) { cw("[STDWRN]",x) }; console.error = function(x) { ce("[STDERR]",x) }
 
 /*
 
@@ -40,7 +40,7 @@ import * as os from "node:os";
 console.log(`[REM] Running REM version ${version}`)
 
 
-import { client as djs_client, setExecutionContext } from "./api/Bot";
+import { addToLog, client as djs_client, setExecutionContext } from "./api/Bot";
 import { Session } from "./api/Session";
 import { RobloxMessage } from "./api/Types";
 import { REMRuntime, setGlobalRuntime } from "./api/REMCore";
@@ -67,10 +67,8 @@ if ( config.LogStartup == true) {
 				title: "REM has started!",
 				color: 0x00ff00,
 				fields: [
-					({name:"REM version",value:version.toString(),inline:false} as APIEmbedField),
-					({name:"Hostname",value:os.hostname(),inline:false} as APIEmbedField),
-					({name:"Current user",value:os.userInfo().username,inline:false} as APIEmbedField),
-					({name:"NodeJS PID",value:process.pid.toString(),inline:false} as APIEmbedField)
+					({name:"Host",value:`${os.userInfo().username}@${os.hostname()}`,inline:false} as APIEmbedField),
+					({name:"PID",value:process.pid.toString(),inline:false} as APIEmbedField)
 				]
 			}
 			
@@ -98,6 +96,9 @@ signals.forEach((signal:string)=>{
 		if (signal=="SIGINT") {process.stdout.write('\b\b')}
 		if (isKilling) return;
 		isKilling = true;
+	
+		addToLog("REM Stopped",{signal:signal},0xff0000)
+
 		if (signal == "SIGINT") {
 			console.log('[REM] Received CTRL+C signal, stopping.')
 		} else {

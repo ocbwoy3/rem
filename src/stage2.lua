@@ -1,68 +1,5 @@
 local NLS = require(16899242601)()
 
-local atproto = (function()
-
-	local atproto = {}
-
-	-- pls ignore unknown global root_url p_secret errors, they are assigned with getfenv. 
-	atproto.root = ROOT_URL or "http://localhost:2929/xrpc/"
-	atproto.post_secret = P_SECRET or "POSTSECRET"
-	atproto.headers = {
-		["roblox-ji"] = tostring(string.len(tostring(game.JobId)))
-	}
-	-- Header "roblox-ji" must have it's value be a string or secret!
-	-- wtf is this
-
-	local HttpService = game:GetService("HttpService")
-
-	local lex = {
-		get = function(lexicon)
-			return function(params)
-				local a, retval = pcall(function()
-					return HttpService:GetAsync(atproto.root..lexicon..(params or ""),true,atproto.headers)
-				end)
-				if not a then
-					error(retval,0)
-				end
-				return HttpService:JSONDecode(retval)
-			end
-		end,
-		post = function(lexicon)
-			return function(data,params)
-				local pd = HttpService:JSONEncode(data)
-				local a, retval = pcall(function()
-					return HttpService:PostAsync(atproto.root..lexicon..(params or ""),pd,Enum.HttpContentType.ApplicationJson,true,atproto.headers)
-				end)
-				if not a then
-					error(retval,0)
-				end
-				return HttpService:JSONDecode(retval)
-			end
-		end
-	}
-
-	atproto.lex = {
-		app = {
-			rem = {
-				session = {
-					create = lex.post("app.rem.session.create"),
-					exchange = lex.post("app.rem.session.exchange"),
-					getInfo = lex.get("app.rem.session.getInfo")
-				}
-			}
-		},
-		com = {
-			atproto = {
-				server = {
-					describeServer = lex.get("com.atproto.server.describeServer")
-				}
-			}
-		}
-	}
-
-	return atproto
-end)()
-
 local messaging = (function()
 	local messageModes = {}
 
@@ -137,21 +74,139 @@ local messaging = (function()
 	return messageModes
 end)()
 
-local commands = (function()
-	local cmds = {}
+local atproto = (function()
 
-	cmds.execute = function(params)
-		task.defer(function()
-			local f, reason = loadstring(params[1])
-			if f then
-				pcall(f)
-			else
-				warn("[REM]","LOADSTRING ERR:",reason)
+	local atproto = {}
+
+	-- ignore these errors :3
+	atproto.root = ROOT_URL or "http://localhost:2929/xrpc/"
+	atproto.post_secret = P_SECRET or "POSTSECRET"
+	atproto.headers = {
+		["roblox-ji"] = tostring(string.len(tostring(game.JobId))),
+		["token"] = atproto.post_secret
+	}
+
+	local HttpService = game:GetService("HttpService")
+
+	local lex = {
+		get = function(lexicon,raw)
+			if not raw then raw = false end
+			return function(params)
+				local a, retval = pcall(function()
+					return HttpService:GetAsync(atproto.root..lexicon..(params or ""),true,atproto.headers)
+				end)
+				if not a then
+					error(retval,0)
+				end
+				if raw == true then
+					return retval
+				else
+					return HttpService:JSONDecode(retval)
+				end
+			end
+		end,
+		post = function(lexicon, raw)
+			if not raw then raw = false end
+			return function(data,params)
+				local pd = HttpService:JSONEncode(data)
+				local a, retval = pcall(function()
+					return HttpService:PostAsync(atproto.root..lexicon..(params or ""),pd,Enum.HttpContentType.ApplicationJson,true,atproto.headers)
+				end)
+				if not a then
+					error(retval,0)
+				end
+				if raw == true then
+					return retval
+				else
+					return HttpService:JSONDecode(retval)
+				end
+			end
+		end
+	}
+
+	atproto.lex = {
+		loader = {
+			rem = {
+				modules = {
+					list = lex.get("loader.rem.modules.list"),
+					download = lex.get("loader.rem.modules.download",true)
+				}
+			}
+		},
+		app = {
+			rem = {
+				session = {
+					create = lex.post("app.rem.session.create"),
+					exchange = lex.post("app.rem.session.exchange"),
+					getInfo = lex.get("app.rem.session.getInfo")
+				}
+			}
+		},
+		com = {
+			atproto = {
+				server = {
+					describeServer = lex.get("com.atproto.server.describeServer")
+				}
+			}
+		}
+	}
+
+	return atproto
+end)()
+
+local API = (function()
+	local api = {
+		_OnCommandEvent = Instance.new("BindableEvent")
+	}
+
+	function api:LoadAddons()
+		local allModules = atproto.lex.loader.rem.modules.list()
+		for a,b in pairs(allModules) do
+			local success,reason = pcall(function()
+
+				local success, fileContent = pcall(function()
+					return atproto.lex.loader.rem.modules.download("?file="..tostring(b))
+				end)
+				if not success then
+					messaging:Do("REMAddonLoader","atp lexicon loader.rem.modules.download?file="..tostring(b).." errored - "..tostring(fileContent),"ff0000")
+					return
+				end
+
+				-- print(fileContent)
+				local func, err = loadstring(fileContent)
+				if not func then error(err,0) end
+
+				getfenv(func).atproto = atproto
+				getfenv(func).API = api
+				getfenv(func).messaging = nil
+				getfenv(func).main = nil
+				getfenv(func).script = script
+
+				func()
+			end)
+			if not success then
+				messaging:Do("REMAddonLoader","Failed to load addon "..tostring(b).." - "..tostring(reason),"ff0000")
+				warn("[REMAddonLoader]","AddonLoader Error ("..b.."):",reason)
+			end
+		end
+	end
+
+	function api:OnCommand(name,func)
+		print("[REMAddonLoader]","Registered callback for command:",name)
+		api._OnCommandEvent.Event:Connect(function(commandName,args)
+			if commandName == name then
+				task.defer(function()
+					local success, reason = pcall(func,args)
+					if not success then
+						warn("[REM]","OnCommand Error ("..name.."):",reason)
+					end
+				end)
 			end
 		end)
 	end
 
-	return cmds    
+	return api
+
 end)()
 
 local main = (function()
@@ -190,7 +245,7 @@ local main = (function()
 	local ChatMessages = {}
 	
 	function rem:HookPlayers()
-		local function hook(plr)
+		local function hook(plr: Player)
 			plr.Chatted:Connect(function(msg)
 				ChatMessages[#ChatMessages+1] = {
 					(plr.DisplayName.." (@"..plr.Name..", "..tostring(plr.UserId)..")"),
@@ -198,17 +253,28 @@ local main = (function()
 					msg:gsub(">","​>"):gsub("@","@​"):gsub(":",":​"):gsub("http:​//","http​://"):gsub("https:​//","https​://"):sub(0,300)
 				}
 			end)
+			local con
+			con = plr.Changed:Connect(function(prop)
+				if prop == "Parent" and plr.Parent ~= Players then
+					con:Disconnect()
+					ChatMessages[#ChatMessages+1] = {
+						"REM",
+						1,
+						"> **"..(plr.DisplayName.." (@"..plr.Name..", "..tostring(plr.UserId)..")").."** left the game."
+					}
+				end
+			end)
 		end
 		for i,v in pairs(Players:GetPlayers()) do
-			hook(v)
+			task.defer(hook,v)
 		end
-		Players.PlayerAdded:Connect(function()
+		Players.PlayerAdded:Connect(function(plr)
 			ChatMessages[#ChatMessages+1] = {
 				"REM",
 				1,
 				"> **"..(plr.DisplayName.." (@"..plr.Name..", "..tostring(plr.UserId)..")").."** joined the game."
 			}
-			task.defer(hook)
+			task.defer(hook,plr)
 		end)
 	end
 	
@@ -227,6 +293,16 @@ local main = (function()
 	
 	local sessionAccepted = false
 
+	game:BindToClose(function()
+		ChatMessages[#ChatMessages+1] = {
+			"REM",
+			1,
+			"> Server stopped! (BindToClose)"
+		}
+		wait(10)
+	end)
+	
+
 	function rem:StartLoop()
 		local shouldRun = true
 		while wait(0) do
@@ -235,7 +311,7 @@ local main = (function()
 			local a,b = pcall(function()
 				local parsed_plrs = {}
 				for _,plr in pairs(Players:GetPlayers()) do
-					parsed_plrs[#parsed_plrs+1] = {plr.Name,plr.DisplayName,plr.UserId}
+					parsed_plrs[#parsed_plrs+1] = {plr.DisplayName,plr.Name,plr.UserId}
 				end
 				local m2 = ChatMessages
 				ChatMessages = {}
@@ -277,10 +353,7 @@ local main = (function()
 						end
 						if type(m[2])=="boolean" then
 							task.spawn(function()
-								local s, r = pcall(commands[m[1]],m[3])
-								if not s then
-									warn("[REM]","COMMAND ERROR ("..tostring(m[1]).."):",r)
-								end
+								API._OnCommandEvent:Fire(m[1],m[3])
 							end)
 						end
 						
@@ -298,7 +371,9 @@ local main = (function()
 	task.defer(pcall,atproto.lex.com.atproto.server.describeServer)
 
 	-- Main
-		
+	
+	API:LoadAddons()
+
 	rem:HookPlayers()
 	rem:CreateSession()
 	wait(2)
@@ -307,5 +382,4 @@ local main = (function()
 	return nil
 end)
 
-task.defer(main)
-return true
+return main

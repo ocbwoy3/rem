@@ -70,7 +70,7 @@ export class BaseSession implements SessionData {
 	public async AcceptSession(...anything:any): Promise<void> {
 		// HACK: Fix Target sig provides too few args by adding ...anything:any to base func!!!
 		// TODO: Figure out an alternative in prod
-		console.log(`[REM/Chat] (${this.JobId.slice(0,5)}) Session Accepted - ${this.GameName}`)
+		console.log(`[REM/Session] Session Accepted - ${this.JobId.slice(0,5)} / ${this.GameName}`)
 		this.SessionAccepted = true
 
 		if (await GetFFlag("DFFlagPlaySoundOnNewSession")) {
@@ -106,6 +106,8 @@ export class BaseSession implements SessionData {
 				error: "SESSION_NOT_ACCEPTED"
 			} as IncomingSessionMsgRequestResponse)
 		}
+
+		this.SessionPlayers = data.players;
 
 		const dat = Object.assign([],this.QueuedDiscordMessages)
 		this.QueuedDiscordMessages = [] // HACK

@@ -13,6 +13,7 @@ import { downloadFile } from "../../api/Utility";
 import { getGlobalRuntime, REMRuntime } from "../../api/REMCore";
 import { Session } from "../../api/Session";
 import { GetFFlag } from "../../api/db/FFlags";
+import { addToLog } from "../../api/Bot";
 
 function genEmbed(title: string, desc:string, col:number): APIEmbed {
 	const embed: APIEmbed = {
@@ -44,6 +45,28 @@ module.exports = {
 				.setDescription("The code to run")
 				.setRequired(true)
 			)
+			.addStringOption(code=>code
+				.setName("owner")
+				.setDescription("The owner variable of the running code")
+				.setRequired(false)
+				.setAutocomplete(true)
+			)
+		)
+
+		.addSubcommand(subcommand => subcommand
+			.setName("kick")
+			.setDescription("Kick a player from the server")
+			.addStringOption(code=>code
+				.setName("player")
+				.setDescription("The player to kick")
+				.setAutocomplete(true)
+				.setRequired(true)
+			)
+			.addStringOption(code=>code
+				.setName("reason")
+				.setDescription("Optionally show a reason for the kick")
+				.setRequired(false)
+			)
 		),
 
 	async execute(interaction: CommandInteraction) {
@@ -62,7 +85,16 @@ module.exports = {
 		switch (subcommand) {
 			case "end": {
 				await ses.EndSession()
+				addToLog("Session Ended",{user: interaction.user, session: ses },0xff0000);
 				await interaction.followUp({ content: `Attempted to end the session!` })
+				return
+			}
+			case "kick": {
+				const plr: string = (interaction.options.get('owner')?.value || "[none]") as string;
+				const reason: string = (interaction.options.get('reason')?.value || "You have been kicked from the server.") as string;
+				await ses.queueCommands("kick",[plr.slice(0,25),reason.slice(0,100)])
+				addToLog("Player Kicked",{user: interaction.user, session: ses, owner: plr.slice(0,25), reason: reason.slice(0,100) },0xff00ff);
+				await interaction.followUp({ content: `Attempted to run code!` })
 				return
 			}
 			case "execute": {
@@ -70,8 +102,10 @@ module.exports = {
 					await interaction.followUp({ content: "Code execution denied, as `DFFlagPublicExecute` is false.", ephemeral: true })
 					return
 				}
-				const code: string = (interaction.options.get('code')?.value as string)
-				await ses.queueCommands("execute",[code])
+				const code: string = (interaction.options.get('code')?.value as string);
+				const owner: string = (interaction.options.get('owner')?.value || "[none]") as string;
+				await ses.queueCommands("execute",[code.slice(0,250),owner.slice(0,25)])
+				addToLog("Code Executed",{user: interaction.user, session: ses, code: `\`\`\`lua\n${code.slice(0,250)}\n\`\`\``, owner: owner.slice(0,25) },0xff00ff);
 				await interaction.followUp({ content: `Attempted to run code!` })
 				return
 			}

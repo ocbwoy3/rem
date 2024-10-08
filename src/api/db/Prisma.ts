@@ -2,11 +2,17 @@ import { PrikolsHubServiceBan, PrismaClient, User } from '@prisma/client'
 import { withAccelerate } from '@prisma/extension-accelerate'
 import * as config from '../../../config.json';
 import { CreateNewDid } from '../atproto/DIDHandleResolver';
+import { addToLog, client } from '../Bot';
+import { Client } from 'discord.js';
 
 export const prisma = new PrismaClient()//.$extends(withAccelerate())
 
 export async function createUser(discordUserId: string) {
-	const userDid = await CreateNewDid(config.atproto_url.replace("*",`u${discordUserId}`))
+	let handle = config.atproto_url.replace("*",`u${discordUserId}`)
+	if (discordUserId === (client as Client).user?.id) {
+		handle = config.atproto_url.replace("*","rem")
+	}
+	const userDid = await CreateNewDid(handle)
 	const user = await prisma.user.create({
 		data: {
 			discordUserId: discordUserId,
@@ -17,6 +23,7 @@ export async function createUser(discordUserId: string) {
 			atprotoPrivateKey: userDid.didSecret
 		},
 	})
+	addToLog("New User",{user:`<@${discordUserId}>`,handle:user.atprotoHandle,did:user.atprotoDid},0x00ffff);
 }
 
 export type ModerationReport = {

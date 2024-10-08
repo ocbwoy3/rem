@@ -26,5 +26,9 @@
 	"DFFlagSkidtruLLamaGuard": {
 		"desc": "Runs Skidtru's responses trough llamaguard",
 		"default": true
+	},
+	"DFFlagChatMessageHandles": {
+		"desc": "Overrides chat DisplayNames with the user's handle",
+		"default": false
 	}
 }

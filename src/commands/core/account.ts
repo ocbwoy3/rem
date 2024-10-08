@@ -12,6 +12,7 @@ import { rm, rmSync } from "node:fs";
 import { downloadFile } from "../../api/Utility";
 import { getGlobalRuntime, REMRuntime } from "../../api/REMCore";
 import { Session } from "../../api/Session";
+import { addToLog } from "../../api/Bot";
 
 function genEmbed(title: string, desc:string, col:number): APIEmbed {
 	const embed: APIEmbed = {
@@ -87,6 +88,7 @@ module.exports = {
 
 				await setUsername(interaction.user.id,newUser.slice(0,20))
 
+				addToLog("Username Changed",{user: interaction.user, oldUsername: account, newUsername: newUser.slice(0,20) });
 				await interaction.followUp({ embeds: [genEmbed("Account","Your username has been updated.",0x00ff00)] })
 				return
 			}

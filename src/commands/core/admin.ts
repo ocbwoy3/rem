@@ -9,18 +9,53 @@ import {
 	APIEmbedField,
 	AttachmentBuilder
 } from "discord.js";
-import { banUser, getUserAdmin, prisma, setUserAdmin, unbanUser } from "../../api/db/Prisma";
+import { banUser, getUserAdmin, getUserInfo, prisma, setUserAdmin, unbanUser } from "../../api/db/Prisma";
 import { rm, rmSync } from "node:fs";
 import { downloadFile } from "../../api/Utility";
-import { BotOwner, RootURL } from "../../../config.json";
+import { BotOwner, RootURL, atproto_url } from "../../../config.json";
 import { AllFFlagDoc, FFlagDoc, GetAllFFlags, GetFFlag, GetFFlagUnsafe, SetFFlag } from "../../api/db/FFlags";
 import e from "express";
+import { addToLog } from "../../api/Bot";
+import { exec } from "node:child_process";
+import { getGlobalRuntime, REMRuntime } from "../../api/REMCore";
+import { updateHandle } from "../../api/atproto/DIDHandleResolver";
 
 module.exports = {
 	moderation_bypass: true,
 	data: new SlashCommandBuilder()
 		.setName('admin')
 		.setDescription('Control REM')
+
+		.addSubcommandGroup(group => group
+			.setName("dev")
+			.setDescription("Manage the bot")
+			
+			.addSubcommand(subcommand => subcommand
+				.setName("eval")
+				.setDescription("Executes bash code on the computer running REM")
+				.addStringOption(stdin=>stdin
+					.setName("stdin")
+					.setDescription("Code to execute")
+					.setRequired(true)
+				)
+			)
+
+			.addSubcommand(subcommand => subcommand
+				.setName("force_identity")
+				.setDescription("Updates your handle bypassing all restrictions")
+				.addStringOption(newhandle=>newhandle
+					.setName("new_handle")
+					.setDescription("The new handle")
+					.setRequired(true)
+				)
+				.addUserOption(user=>user
+					.setName("user")
+					.setDescription("The user to update")
+					.setRequired(false)
+				)
+			)
+
+		)
 
 		.addSubcommandGroup(group => group
 			.setName("db")
@@ -147,6 +182,82 @@ module.exports = {
 		await interaction.deferReply({ fetchReply: true, ephemeral: true});
 
 		switch (subcommandG) {
+			case "dev": {
+				if (interaction.user.id != BotOwner) {
+					let embed2: APIEmbed = {
+						title: "Owner Only",
+						description: `You cannot access this command!`.replace(/\t/g,'').replace(/\n/g,' ').trim(),
+						color: 0xff0000
+					}
+					return interaction.followUp({ embeds: [embed2] });
+				}
+				switch (subcommand) {
+					case "bypass_identity": {
+						const new_handle = interaction.options.get('new_handle')?.value as string
+						const ud = await getUserInfo(interaction.user.id)
+
+						const user: string = (interaction.options.get('user')?.value as string || interaction.user.id);
+
+						prisma.user.update({
+							where: {
+								discordUserId: user.toString()
+							},
+							data: {
+								atprotoHandle: new_handle
+							}
+						}).then(async()=>{
+							addToLog("Handle Changed (Check Bypass)",{user: interaction.user, targetUser: `<@${user}>`, oldHandle: ud.atprotoHandle, newHandle: new_handle});
+
+							updateHandle(ud.atprotoDid,ud.atprotoPrivateKey,new_handle);
+	
+							const stupid = `You'll need to add a DNS record to your domain:
+	Name: \`_atproto.${new_handle}\`
+	Type: \`TXT\`
+	Content: \`did=${ud.atprotoDid}\`
+	
+	Or add a file to your site:
+	Path: \`https://${new_handle}/.well-known/atproto-did\`
+	Content: \`${ud.atprotoDid}\`
+							`
+	
+							let embed: APIEmbed = {
+								title: "Success",
+								description: stupid.replace(/\t/g,'').trim(),
+								color: 0x00ff00
+							}
+	
+							if (new_handle.endsWith(atproto_url.replace("*",""))) {
+								let embed: APIEmbed = {
+									title: "Success",
+									description: `Your handle has been successfully changed.\nYour new handle is under \`${atproto_url}\`, the record management was successful.`,
+									color: 0x00ff00
+								}
+								return interaction.reply({ embeds: [embed], ephemeral: true });
+							}
+	
+							return interaction.reply({ embeds: [embed], ephemeral: true });
+						}).catch((err: string)=>{
+							let embed: APIEmbed = {
+								title: "Error",
+								description: `Could not update your handle. Most likely it's in use by a different user.\n\`\`\`\n${err}\n\`\`\``,
+								color: 0xff0000
+							}
+							return interaction.reply({ embeds: [embed], ephemeral: true });
+						})
+					};
+					case "eval": {
+						const stdin = (interaction.options.get('stdin') as any).value;
+						addToLog("Child Process Executed",{user: interaction.user, stdin: `${(interaction.options.get('stdin') as any).value}`},0x0000ff);
+						interaction.followUp({ content: `executing code` }).catch(()=>{});
+						exec(stdin,async(_,stdout:string)=>{
+							interaction.channel?.send(stdout).catch(()=>{});
+						})
+						return;
+					}
+					default: { await interaction.followUp({ content:"unknown subcommand" }) }
+				}
+				return;
+			}
 			case "db": {
 				if (interaction.user.id != BotOwner) {
 					let embed2: APIEmbed = {
@@ -202,11 +313,13 @@ module.exports = {
 				} 
 				switch (subcommand) {
 					case "ban": {
+						addToLog("User Banned from REM",{moderator: interaction.user, userBanned: `<@${(interaction.options.get('reason') as any).value}>`},0xff0000);
 						await banUser((interaction.options.get('user') as any).value,(interaction.options.get('reason') as any).value,interaction.user.id);
 						await interaction.followUp({ content: `Sucessfully banned <@${(interaction.options.get('user') as any).value}> from REM!` });
 						return;
 					}
 					case "unban": {
+						addToLog("User Unbanned from REM",{moderator: interaction.user, userUnbanned: `<@${(interaction.options.get('reason') as any).value}>`},0x00ff00);
 						await unbanUser((interaction.options.get('user') as any).value);
 						await interaction.followUp({ content: `Sucessfully unbanned <@${(interaction.options.get('user') as any).value}> from REM!` });
 						return;
@@ -298,6 +411,7 @@ module.exports = {
 							return;
 						}
 						await SetFFlag(fflag,value);
+						addToLog("FFlag Set",{user: interaction.user, fflag: fflag, oldState: `${current}`, newState: `${value}`},0x0000ff);
 						await interaction.followUp({ content: `Success. ${fflag}: ${current} -> ${value}` });
 						return;
 					}

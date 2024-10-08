@@ -7,6 +7,7 @@ import {
 } from "discord.js";
 
 import * as si from 'systeminformation';
+import * as config from '../../../config.json';
 import checkDiskSpace from 'check-disk-space';
 import * as os from 'os';
 import * as fs from 'node:fs';
@@ -77,34 +78,34 @@ module.exports = {
 
 		if (os.type()!='Windows_NT') {
 			uptimeoutput = await (new Promise(async(resolve)=>{
-				exec('uptime -p',(e,stdout)=>{
+				exec('uptime',(e,stdout)=>{
 					resolve(stdout.trim().replace(/\s/g,' ').trim().replace(/up /,''))
-				})
-			}))
-	
-			uptimeoutput_2 = await (new Promise(async(resolve)=>{
-				exec('uptime -s',(e,stdout)=>{
-					resolve(stdout.trim().replace(/\s/g,' ').trim())
 				})
 			}))
 		}
 
-		const msg = `# ${os.userInfo().username}@${os.hostname()}
-		**Uptime:** \`${uptimeoutput}, since ${uptimeoutput_2}\`
-		**OS:** ${osPrettyName}
-		**CPU:** ${sicpu.cores}x ${sicpu.manufacturer} ${sicpu.brand} @ ${sicpuspeed.avg} GHz
-		**CPU Temp:** ${sicputemp.main}°C
-		**System:** ${sisys.manufacturer} ${sisys.model}
-		**Memory (used/total):** ${formatBytes(simem.used,2)} of ${formatBytes(simem.total,2)}
-		**${os.type()=='Windows_NT' ? 'Pagefile' : "Swap"} (used/total):** ${formatBytes(simem.swapused,2)} of ${formatBytes(simem.swaptotal,2)}
-		**Disk \`${os.type()=='Windows_NT' ? 'C:\\' : "/"}\` (used/total):** ${formatBytes(diskusedroot.size-diskusedroot.free,2)} of ${formatBytes(diskusedroot.size,2)} 
-		
-		# rem@${require("../../../package.json").version}
-		**PID:** ${process.pid}
-		**CWD:** \`${cwd()}\`
+		const pdsDid = 'did:web:'+ config.RootURL
+			.replace("http://","")
+			.replace("https://","")
+			.replace("/","/")
 
-		# AT Protocol
-		**\`Loaded Lexicons\`:** ${Object.keys(getMethods()).length}
+		const msg = `> # ${os.userInfo().username}@${os.hostname()}
+		> -# **Uptime:** ${uptimeoutput.replace("\t"," ")}
+		> -# **OS:** ${osPrettyName}
+		> -# **CPU:** ${sicpu.cores}x ${sicpu.manufacturer} ${sicpu.brand} @ ${sicpuspeed.avg} GHz
+		> -# **CPU Temp:** ${sicputemp.main}°C
+		> -# **System:** ${sisys.manufacturer} ${sisys.model}
+		> -# **Memory (used/total):** ${formatBytes(simem.used,2)} of ${formatBytes(simem.total,2)}
+		> -# **${os.type()=='Windows_NT' ? 'Pagefile' : "Swap"} (used/total):** ${formatBytes(simem.swapused,2)} of ${formatBytes(simem.swaptotal,2)}
+		> -# **Disk \`${os.type()=='Windows_NT' ? 'C:\\' : "/"}\` (used/total):** ${formatBytes(diskusedroot.size-diskusedroot.free,2)} of ${formatBytes(diskusedroot.size,2)} 
+		
+		> # rem@${require("../../../package.json").version}
+		> -# **PID:** ${process.pid}
+		> -# **CWD:** \`${cwd()}\`
+
+		> # AT Protocol
+		> -# **PDS - Address:** \`${pdsDid}\`
+		> -# **XRPC Server - Loaded Lexicons:** ${Object.keys(getMethods()).length}
 		\`\`\`
 		${Object.keys(getMethods()).join(', ')}
 		\`\`\`

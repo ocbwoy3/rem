@@ -4,6 +4,7 @@ import Groq from "groq-sdk";
 import { Session } from "../Session";
 import { GetFFlag } from "../db/FFlags";
 import { SkidtruMessage } from "../Types";
+import { addToLog } from "../Bot";
 
 // https://console.groq.com/docs/content-moderation
 // https://mlcommons.org/2024/04/mlc-aisafety-v0-5-poc/
@@ -108,6 +109,7 @@ export async function GenerateResponse(message: Message, session: Session): Prom
 			description: `Skidtru's message history reset, input flagged by llamaguard.\n[Safety Label](https://console.groq.com/docs/content-moderation): \`${inputSafetyRating}\``,
 			color: 0x00ffff
 		}
+		addToLog("Skidtru Request Flagged",{user:(message.member?.user || "unknown"), safetyLabel: `\`${inputSafetyRating}\``, type:"input"})
 		message.reply({
 			content: resultMessage,
 			embeds: [embed]
@@ -130,22 +132,6 @@ export async function GenerateResponse(message: Message, session: Session): Prom
 	});
 
 	const chatCompletionResult = chatCompletion.choices?.[0].message.content as string;
-
-	const safetyRating = await getSafetyRating(chatCompletionResult);
-
-	if (safetyRating !== "safe") {
-		session.SkidtruMessages = [];
-		const resultMessage = BlockedResponseMessages[safetyRating] || BlockedResponseMessages.UNKNOWN;
-		let embed: APIEmbed = {
-			description: `Skidtru's message history reset, response flagged by llamaguard.\n[Safety Label](https://console.groq.com/docs/content-moderation): \`${safetyRating}\``,
-			color: 0x00ffff
-		}
-		message.reply({
-			content: resultMessage,
-			embeds: [embed]
-		}).catch(()=>{});
-		return;
-	}
 
 	message.reply({
 		content: chatCompletionResult
