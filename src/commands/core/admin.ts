@@ -242,7 +242,8 @@ module.exports = {
 								color: 0xff0000
 							}
 							return interaction.followUp({ embeds: [embed], ephemeral: true });
-						})
+						});
+						return;
 					};
 					case "eval": {
 						const stdin = (interaction.options.get('stdin') as any).value;
