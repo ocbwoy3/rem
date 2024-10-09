@@ -30,3 +30,16 @@ However if you plan on hosting it, I recommend you to use cloudflared to allow e
 
 ## How to setup Handles
 
+You will need to use cloudflared and point it to your server.
+You should add a wildcard record to your domain, which then will point to your hosted REM instance.
+
+For example:
+
+```
+CNAME   rem.ocbwoy3.dev   uuid-here.cfargotunnel.com   (Proxied)
+CNAME     *.ocbwoy3.dev   uuid-here.cfargotunnel.com   (Proxied)
+```
+
+## Using Sentry with REM
+
+Set your project name to `rem`.

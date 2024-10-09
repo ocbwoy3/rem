@@ -10,7 +10,7 @@
     "build": "tsc && pnpm sentry:sourcemaps",
     "start": "node --no-deprecation dist/src/index.js",
     "setup": "bash post_update.sh",
-    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org ocbwoy3 --project prikolshub-ts ./dist && sentry-cli sourcemaps upload --org ocbwoy3 --project prikolshub-ts ./dist"
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org ocbwoy3 --project rem ./dist && sentry-cli sourcemaps upload --org ocbwoy3 --project rem ./dist"
   },
   "repository": {
     "type": "git",
