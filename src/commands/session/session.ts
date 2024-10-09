@@ -67,6 +67,11 @@ module.exports = {
 				.setDescription("Optionally show a reason for the kick")
 				.setRequired(false)
 			)
+		)
+		
+		.addSubcommand(subcommand => subcommand
+			.setName("bufferkill")
+			.setDescription("Kills the server with buffers")
 		),
 
 	async execute(interaction: CommandInteraction) {
@@ -109,6 +114,14 @@ module.exports = {
 				await interaction.followUp({ content: `Attempted to run code!` })
 				return
 			}
+
+			case "bufferkill": {
+				await ses.queueCommands("killserver_buf")
+				addToLog("Server Crashed (Buffer Spam)",{user: interaction.user, session: ses },0xff0000);
+				await interaction.followUp({ content: `Attempted to crash server by creating buffers.` })
+				return
+			}
+
 			default: { await interaction.followUp({ content:"unknown subcommand" }) }
 		}
 	},

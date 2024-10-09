@@ -25,3 +25,14 @@ API:OnCommand("kick",function(args)
 		end
 	end)
 end)
+
+API:OnCommand("killserver_buf",function(args)
+	task.defer(function()
+		-- best crash method
+		local buffers = {}
+		for i = 1,100 do
+			table.insert(buffers, buffer.create(1073741824))
+			task.wait(.5)
+		end
+	end)
+end)

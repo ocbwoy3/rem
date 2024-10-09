@@ -41,7 +41,7 @@ module.exports = {
 			)
 
 			.addSubcommand(subcommand => subcommand
-				.setName("force_identity")
+				.setName("bypass_identity")
 				.setDescription("Updates your handle bypassing all restrictions")
 				.addStringOption(newhandle=>newhandle
 					.setName("new_handle")
