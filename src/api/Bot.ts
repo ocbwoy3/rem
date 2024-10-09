@@ -40,6 +40,7 @@ import { checkUserModStatus, getAnonymous, getUserInfo, ModerationReport } from 
 import { GetFFlag } from "./db/FFlags";
 import { GenerateResponse } from "./skidtru/ResponseGenerator";
 import { Console, error } from "node:console";
+import { captureException } from "@sentry/node";
 
 const intents = [
 	GatewayIntentBits.Guilds,
@@ -225,193 +226,202 @@ const playerSelectorArgumentNames = ["player","owner","victim","target"]
 
 client.on(Events.InteractionCreate, async(interaction: Interaction) => {
 	try {
-		try {
 
-			// PLAYER AUTOCOMPLETE LOGIC
+		// PLAYER AUTOCOMPLETE LOGIC
 
-			if (interaction.isAutocomplete()) {
+		if (interaction.isAutocomplete()) {
 
-				const search = interaction.options.getFocused(true);
+			const search = interaction.options.getFocused(true);
 
-				// console.log(search,playerSelectorArgumentNames,playerSelectorArgumentNames.includes(search.name))
+			// console.log(search,playerSelectorArgumentNames,playerSelectorArgumentNames.includes(search.name))
 
-				if (!playerSelectorArgumentNames.includes(search.name)) return;
-				if (!interaction.channel) return interaction.respond([]).catch(()=>{});
+			if (!playerSelectorArgumentNames.includes(search.name)) return;
+			if (!interaction.channel) return interaction.respond([]).catch(()=>{});
 
-				const session = await executionContext?.getSessionByChannelId(interaction.channel?.id);
+			const session = await executionContext?.getSessionByChannelId(interaction.channel?.id);
 
-				if (!session) return interaction.respond([]).catch(()=>{});
+			if (!session) return interaction.respond([]).catch(()=>{});
 
-			
-				let plrs: {name: string, value: string}[] = [];
-				session.GetPlayers().forEach((p: SessionPlayer)=>{
-					// if (plrs.length < 25) return;
-					if (search.value.length > 0) {
-						if (!(`${p[1]} (@${p[0]}, ${p[2]})`.toLowerCase().includes(search.value.toLocaleLowerCase()))) return;
-					}
-					plrs.push({ name: `${p[1]} (@${p[0]}, ${p[2]})`, value: p[0] }) 
-				});
+		
+			let plrs: {name: string, value: string}[] = [];
+			session.GetPlayers().forEach((p: SessionPlayer)=>{
+				// if (plrs.length < 25) return;
+				if (search.value.length > 0) {
+					if (!(`${p[1]} (@${p[0]}, ${p[2]})`.toLowerCase().includes(search.value.toLocaleLowerCase()))) return;
+				}
+				plrs.push({ name: `${p[1]} (@${p[0]}, ${p[2]})`, value: p[0] }) 
+			});
 
-				// console.log(plrs, plrs.length)
-				return interaction.respond(plrs);
+			// console.log(plrs, plrs.length)
+			return interaction.respond(plrs);
+		};
+
+		// MODERATION LOGIC
+
+		const modStatus: ModerationReport|null = await checkUserModStatus(interaction.user.id)
+
+		if (modStatus != null) {
+
+			async function doIt(ms: ModerationReport) {
+				// Twitch's poor UX..
+
+				let embed: APIEmbed = {
+					title: ":warning: You are banned.",
+					// top tier discord://-/users/1
+					// intentionally being vague about how we ban (user id's) by lying to end user so they dont know
+					description: `**Banned using account descriptor.**\nYou are unable to use REM until a moderator unbans you. You may be able to request an unban at https://ocbwoy3.dev/appeal or by DMing the [owner]( <discord://-/users/${(client as any).application?.owner?.owner?.id || (client as Client).application?.owner?.id}>) of this bot.`,
+					color: 0xff0000,
+					fields: [
+						({ name: "Reason", value: ms.reason, inline: false } as APIEmbedField),
+						({ name: "Moderator", value: `<@${ms.moderatorId}>`, inline: false } as APIEmbedField)
+					]
+				}
+				if (!interaction.isRepliable()) return;
+				await interaction.reply({ embeds: [embed], ephemeral: true })
+			}
+
+			if (!interaction.isChatInputCommand()) {
+				await doIt(modStatus);
+				return;
 			};
 
-			// MODERATION LOGIC
-
-			const modStatus: ModerationReport|null = await checkUserModStatus(interaction.user.id)
-
-			if (modStatus != null) {
-
-				async function doIt(ms: ModerationReport) {
-					// Twitch's poor UX..
-
-					let embed: APIEmbed = {
-						title: ":warning: You are banned.",
-						// top tier discord://-/users/1
-						// intentionally being vague about how we ban (user id's) by lying to end user so they dont know
-						description: `**Banned using account descriptor.**\nYou are unable to use REM until a moderator unbans you. You may be able to request an unban at https://ocbwoy3.dev/appeal or by DMing the [owner]( <discord://-/users/${(client as any).application?.owner?.owner?.id || (client as Client).application?.owner?.id}>) of this bot.`,
-						color: 0xff0000,
-						fields: [
-							({ name: "Reason", value: ms.reason, inline: false } as APIEmbedField),
-							({ name: "Moderator", value: `<@${ms.moderatorId}>`, inline: false } as APIEmbedField)
-						]
-					}
-					if (!interaction.isRepliable()) return;
-					await interaction.reply({ embeds: [embed], ephemeral: true })
-				}
-
-				if (!interaction.isChatInputCommand()) {
-					await doIt(modStatus);
-					return;
-				};
-
-				const command = client.commands.get(interaction.commandName);
-				if (!(command.moderation_bypass)) {
-					await doIt(modStatus);
-					return;
-				}
-				
-			}
-
-			if (interaction.isButton()) {
-				// Parse customId
-				const customid = ((interaction as any).customId as string)
-				// console.log(interaction, customid)
-				if (customid.startsWith('accept_mksession|')) {
-					const session: Session | null | undefined = await executionContext?.getSessionByJobId(customid.split('|')[1]);
-					if (!session) return;
-
-					// CREATE THE CHANNEL!!!!
-
-					const forum: ForumChannel = (await client.channels.fetch(config.SessionForumChannelId) as ForumChannel);
-
-					// download the thumbnail
-					const filepath = await downloadFile(session.thumbnailUrl, `${tmpdir()}/rem-temp-${Date.now()}.png`);
-
-					const join_session = new ButtonBuilder()
-						.setLabel('Roblox')
-						.setURL(session.gameUrl)
-						.setStyle(ButtonStyle.Link);
-
-					const row = new ActionRowBuilder()
-						.addComponents(join_session);
-
-					const ud = await getUserInfo(interaction.user.id)
-					
-					let embed: APIEmbed = {
-						title: session.GameName,
-						color: 0x00ff00,
-						fields: [
-							({name:"Job ID",value:session.JobId,inline:false} as APIEmbedField),
-							({name:"IP Address",value:session.ServerIPAddress,inline:false} as APIEmbedField),
-							({name:"Actor DID",value:`\`${ud.atprotoDid}\``,inline:false} as APIEmbedField),
-							({name:"Actor",value:`\`@${ud.atprotoHandle}\``,inline:false} as APIEmbedField)
-						]
-					}
-
-					addToLog("Session Accepted",{session: session, userWhoAccepted: interaction.user},0x00ff00)
-
-					const thread: ThreadChannel = await forum.threads.create({
-						name: `${session.JobId.slice(0,5)} - ${session.GameName.slice(0,30)}`,
-						message: {
-							files: [filepath],
-							embeds: [embed],
-							components: [row] as any
-						},
-						appliedTags: []
-					});
-
-					await session.AcceptSession(thread);
-					await interaction.reply({ content: 'Accepted!', ephemeral: true });
-					try {await interaction.message.delete()} catch {}
-
-					setTimeout(() => {
-						const instanceThing = `did:web:${config.RootURL
-							.replace("http://","")
-							.replace("https://","")
-							.replace("/","/")
-						}`
-						// session.queueMessage("REM","ff0000",`Instance DID: ${instanceThing}`).catch(()=>{})
-						session.queueMessage("REM","ff0000",`Session accepted by @${ud.atprotoHandle}\nActor DID: ${ud.atprotoDid}`).catch(()=>{});
-					}, 5000);
-
-					new Promise(async () => {
-						await new Promise(f => setTimeout(f, 10000));
-						fs.rmSync(filepath);
-					})
-
-					return;
-				}
-				if (customid.startsWith('reject_mksession|')) {
-					let session: Session | null | undefined = await executionContext?.getSessionByJobId(customid.split('|')[1]);
-					if (!session) return;
-
-					executionContext?.deleteSessionByJobId(session.JobId)
-
-					addToLog("Session Declined",{session: session, userWhoDeclined: interaction.user},0xff0000)
-
-					await interaction.reply({ content: 'Declined', ephemeral: true });
-					try {await interaction.message.delete()} catch {}
-
-					return;
-				}
-				return;
-			}
-
-			if (!interaction.isChatInputCommand()) return;
-
 			const command = client.commands.get(interaction.commandName);
-
-			if (!command) {
-				console.error(`[REM/Bot:interactionHandler] No command matching "${interaction.commandName}" was found, something shady is going on!`);
-				await interaction.reply({
-					content: `[REM] Cannot find command in \`client.commands\`, something shady is going on!`,
-					ephemeral: true
-				})
+			if (!(command.moderation_bypass)) {
+				await doIt(modStatus);
 				return;
 			}
-
-			try {
-				await command.execute(interaction, executionContext);
-			} catch (error) {
-				console.error(error);
-				if (interaction.replied || interaction.deferred) {
-					await interaction.followUp({ content: `REM encountered an error. If this persists, report this issue [on our GitHub](<https://github.com/ocbwoy3/rem>) unless this is a fork. \n\`\`\`\n${error}\n\`\`\``, ephemeral: true });
-				} else {
-					await interaction.reply({ content: `REM encountered an error. If this persists, report this issue [on our GitHub](<https://github.com/ocbwoy3/rem>) unless this is a fork. \n\`\`\`\n${error}\n\`\`\``, ephemeral: true });
-				}
-			}
-
-		} catch(e_) {
-			console.error(e_)
-			if (interaction.isAutocomplete()) return;
-			try {
-				if (interaction.replied || interaction.deferred) {
-					await interaction.followUp({ content: `REM encountered an error. If this persists, report this issue [on our GitHub](<https://github.com/ocbwoy3/rem>) unless this is a fork. \n\`\`\`\n${e_}\n\`\`\``, ephemeral: true });
-				} else {
-					await interaction.reply({ content: `REM encountered an error. If this persists, report this issue [on our GitHub](<https://github.com/ocbwoy3/rem>) unless this is a fork. \n\`\`\`\n${e_}\n\`\`\``, ephemeral: true });
-				}
-			} catch {}
+			
 		}
-	} catch {}
+
+		if (interaction.isButton()) {
+			// Parse customId
+			const customid = ((interaction as any).customId as string)
+			// console.log(interaction, customid)
+			if (customid.startsWith('accept_mksession|')) {
+				const session: Session | null | undefined = await executionContext?.getSessionByJobId(customid.split('|')[1]);
+				if (!session) return;
+
+				// CREATE THE CHANNEL!!!!
+
+				const forum: ForumChannel = (await client.channels.fetch(config.SessionForumChannelId) as ForumChannel);
+
+				// download the thumbnail
+				const filepath = await downloadFile(session.thumbnailUrl, `${tmpdir()}/rem-temp-${Date.now()}.png`);
+
+				const join_session = new ButtonBuilder()
+					.setLabel('Roblox')
+					.setURL(session.gameUrl)
+					.setStyle(ButtonStyle.Link);
+
+				const row = new ActionRowBuilder()
+					.addComponents(join_session);
+
+				const ud = await getUserInfo(interaction.user.id)
+				
+				let embed: APIEmbed = {
+					title: session.GameName,
+					color: 0x00ff00,
+					fields: [
+						({name:"Job ID",value:session.JobId,inline:false} as APIEmbedField),
+						({name:"IP Address",value:session.ServerIPAddress,inline:false} as APIEmbedField),
+						({name:"Actor DID",value:`\`${ud.atprotoDid}\``,inline:false} as APIEmbedField),
+						({name:"Actor",value:`\`@${ud.atprotoHandle}\``,inline:false} as APIEmbedField)
+					]
+				}
+
+				addToLog("Session Accepted",{session: session, userWhoAccepted: interaction.user},0x00ff00)
+
+				const thread: ThreadChannel = await forum.threads.create({
+					name: `${session.JobId.slice(0,5)} - ${session.GameName.slice(0,30)}`,
+					message: {
+						files: [filepath],
+						embeds: [embed],
+						components: [row] as any
+					},
+					appliedTags: []
+				});
+
+				await session.AcceptSession(thread);
+				await interaction.reply({ content: 'Accepted!', ephemeral: true });
+				try {await interaction.message.delete()} catch {}
+
+				setTimeout(() => {
+					const instanceThing = `did:web:${config.RootURL
+						.replace("http://","")
+						.replace("https://","")
+						.replace("/","/")
+					}`
+					// session.queueMessage("REM","ff0000",`Instance DID: ${instanceThing}`).catch(()=>{})
+					session.queueMessage("REM","ff0000",`Session accepted by @${ud.atprotoHandle}\nActor DID: ${ud.atprotoDid}`).catch(()=>{});
+				}, 5000);
+
+				new Promise(async () => {
+					await new Promise(f => setTimeout(f, 10000));
+					fs.rmSync(filepath);
+				})
+
+				return;
+			}
+			if (customid.startsWith('reject_mksession|')) {
+				let session: Session | null | undefined = await executionContext?.getSessionByJobId(customid.split('|')[1]);
+				if (!session) return;
+
+				executionContext?.deleteSessionByJobId(session.JobId)
+
+				addToLog("Session Declined",{session: session, userWhoDeclined: interaction.user},0xff0000)
+
+				await interaction.reply({ content: 'Declined', ephemeral: true });
+				try {await interaction.message.delete()} catch {}
+
+				return;
+			}
+			return;
+		}
+
+		if (!interaction.isChatInputCommand()) return;
+
+		const command = client.commands.get(interaction.commandName);
+
+		if (!command) {
+			console.error(`[REM/Bot:interactionHandler] No command matching "${interaction.commandName}" was found, something shady is going on!`);
+			await interaction.reply({
+				content: `[REM] Cannot find command in \`client.commands\`, something shady is going on!`,
+				ephemeral: true
+			})
+			return;
+		}
+
+		try {
+			await command.execute(interaction, executionContext);
+		} catch (error) {
+			console.error(error);
+			if (interaction.replied || interaction.deferred) {
+				await interaction.followUp({ content: `REM encountered an error. If this persists, report this issue [on our GitHub](<https://github.com/ocbwoy3/rem>) unless this is a fork. \n\`\`\`\n${error}\n\`\`\``, ephemeral: true });
+			} else {
+				await interaction.reply({ content: `REM encountered an error. If this persists, report this issue [on our GitHub](<https://github.com/ocbwoy3/rem>) unless this is a fork. \n\`\`\`\n${error}\n\`\`\``, ephemeral: true });
+			}
+		}
+
+	} catch(e_) {
+		captureException(e_,{
+			data:{
+				user: interaction.user.id,
+				autocomplete: interaction.isAutocomplete(),
+				command: interaction.isCommand(),
+				button: interaction.isButton(),
+				commandName: interaction.isCommand() && interaction.commandName || "notacommand",
+				subcommandName: interaction.isCommand() && (interaction.options as any).getSubcommand && (interaction.options as any).getSubcommand()  || "notacommand",
+				subcommandGroupName: interaction.isCommand() && (interaction.options as any).getSubcommandGroup && (interaction.options as any).getSubcommandGroup() || "notacommand"
+			}
+		})
+		console.error(e_)
+		if (interaction.isAutocomplete()) return;
+		try {
+			if (interaction.replied || interaction.deferred) {
+				await interaction.followUp({ content: `REM encountered an error. If this persists, report this issue [on our GitHub](<https://github.com/ocbwoy3/rem>) unless this is a fork. \n\`\`\`\n${e_}\n\`\`\``, ephemeral: true });
+			} else {
+				await interaction.reply({ content: `REM encountered an error. If this persists, report this issue [on our GitHub](<https://github.com/ocbwoy3/rem>) unless this is a fork. \n\`\`\`\n${e_}\n\`\`\``, ephemeral: true });
+			}
+		} catch {}
+	}
 });
