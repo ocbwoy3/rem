@@ -194,7 +194,8 @@ module.exports = {
 				switch (subcommand) {
 					case "bypass_identity": {
 						const new_handle = interaction.options.get('new_handle')?.value as string
-						const user: string = (interaction.options.get('user')?.value || interaction.user.id) as string;
+						const uo = interaction.options.get('user')
+						const user: string = (uo && uo.value || interaction.user.id) as string;
 						const ud = await getUserInfo(user)
 
 						prisma.user.update({
