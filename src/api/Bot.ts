@@ -395,11 +395,24 @@ client.on(Events.InteractionCreate, async(interaction: Interaction) => {
 			await command.execute(interaction, executionContext);
 		} catch (error) {
 			console.error(error);
-			if (interaction.replied || interaction.deferred) {
-				await interaction.followUp({ content: `REM encountered an error. If this persists, report this issue [on our GitHub](<https://github.com/ocbwoy3/rem>) unless this is a fork. \n\`\`\`\n${error}\n\`\`\``, ephemeral: true });
-			} else {
-				await interaction.reply({ content: `REM encountered an error. If this persists, report this issue [on our GitHub](<https://github.com/ocbwoy3/rem>) unless this is a fork. \n\`\`\`\n${error}\n\`\`\``, ephemeral: true });
-			}
+			captureException(e_,{
+				data:{
+					user: interaction.user.id,
+					autocomplete: interaction.isAutocomplete(),
+					command: interaction.isCommand(),
+					button: interaction.isButton(),
+					commandName: interaction.isCommand() && interaction.commandName || "notacommand",
+					subcommandName: interaction.isCommand() && (interaction.options as any).getSubcommand && (interaction.options as any).getSubcommand()  || "notacommand",
+					subcommandGroupName: interaction.isCommand() && (interaction.options as any).getSubcommandGroup && (interaction.options as any).getSubcommandGroup() || "notacommand"
+				}
+			})
+			try {
+				if (interaction.replied || interaction.deferred) {
+					await interaction.followUp({ content: `REM encountered an error. If this persists, report this issue [on our GitHub](<https://github.com/ocbwoy3/rem>) unless this is a fork. \n\`\`\`\n${error}\n\`\`\``, ephemeral: true });
+				} else {
+					await interaction.reply({ content: `REM encountered an error. If this persists, report this issue [on our GitHub](<https://github.com/ocbwoy3/rem>) unless this is a fork. \n\`\`\`\n${error}\n\`\`\``, ephemeral: true });
+				}
+			} catch {}
 		}
 
 	} catch(e_) {
