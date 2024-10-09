@@ -81,7 +81,7 @@ module.exports = {
 		const ses: Session = (await runtime.getSessionByChannelId(interaction.channelId) as any)
 	
 		if (!ses) {
-			interaction.reply({ embeds: [genEmbed("Error","Current channel is not a session!",0xff0000)], ephemeral: true })
+			interaction.reply({ embeds: [genEmbed("Error","Current channel is not a session!",0xff0000)], ephemeral: true }).catch(()=>{});
 			return
 		}
 

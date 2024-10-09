@@ -189,7 +189,7 @@ module.exports = {
 						description: `You cannot access this command!`.replace(/\t/g,'').replace(/\n/g,' ').trim(),
 						color: 0xff0000
 					}
-					return interaction.followUp({ embeds: [embed2] });
+					return interaction.followUp({ embeds: [embed2] }).catch(()=>{});
 				}
 				switch (subcommand) {
 					case "bypass_identity": {
@@ -231,17 +231,17 @@ module.exports = {
 									description: `Your handle has been successfully changed.\nYour new handle is under \`${atproto_url}\`, the record management was successful.`,
 									color: 0x00ff00
 								}
-								return interaction.followUp({ embeds: [embed], ephemeral: true });
+								return interaction.followUp({ embeds: [embed], ephemeral: true }).catch(()=>{});
 							}
 	
-							return interaction.followUp({ embeds: [embed], ephemeral: true });
+							return interaction.followUp({ embeds: [embed], ephemeral: true }).catch(()=>{});
 						}).catch((err: string)=>{
 							let embed: APIEmbed = {
 								title: "Error",
 								description: `Could not update your handle. Most likely it's in use by a different user.\n\`\`\`\n${err}\n\`\`\``,
 								color: 0xff0000
 							}
-							return interaction.followUp({ embeds: [embed], ephemeral: true });
+							return interaction.followUp({ embeds: [embed], ephemeral: true }).catch(()=>{});
 						});
 						return;
 					};
@@ -265,7 +265,7 @@ module.exports = {
 						description: `You cannot access this command!`.replace(/\t/g,'').replace(/\n/g,' ').trim(),
 						color: 0xff0000
 					}
-					return interaction.followUp({ embeds: [embed2] });
+					return interaction.followUp({ embeds: [embed2] }).catch(()=>{});
 				}
 				switch (subcommand) {
 					case "export": {
@@ -281,7 +281,7 @@ module.exports = {
 						return interaction.followUp({
 							content: `all data from prisma db\n**DO NOT SHARE/DISTRIBUTE**`,
 							files: [usersfile, bansfile, fflagsfile]
-						});
+						}).catch(()=>{});
 					}
 					case "did_keypair": {
 						const did: string = (interaction.options.get('did') as any).value
@@ -296,10 +296,10 @@ module.exports = {
 								description: `User with given DID is not in the database!`,
 								color: 0xff0000
 							}
-							return interaction.followUp({ embeds: [embed] });
+							return interaction.followUp({ embeds: [embed] }).catch(()=>{});
 						}
 						const file = new AttachmentBuilder(Buffer.from(ud.atprotoPrivateKey),{name:"privatekey.bin"});
-						return interaction.followUp({ content: `atproto did private key (stored in current db) - \`${ud.atprotoDid}\` (\`@${ud.atprotoHandle}\`)\n**DO NOT SHARE/DISTRIBUTE**`, files: [file] });
+						return interaction.followUp({ content: `atproto did private key (stored in current db) - \`${ud.atprotoDid}\` (\`@${ud.atprotoHandle}\`)\n**DO NOT SHARE/DISTRIBUTE**`, files: [file] }).catch(()=>{});
 					}
 					default: { await interaction.followUp({ content:"unknown subcommand" }) }
 				}

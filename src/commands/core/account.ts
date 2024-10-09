@@ -89,8 +89,7 @@ module.exports = {
 				await setUsername(interaction.user.id,newUser.slice(0,20))
 
 				addToLog("Username Changed",{user: interaction.user, oldUsername: account, newUsername: newUser.slice(0,20) });
-				await interaction.followUp({ embeds: [genEmbed("Account","Your username has been updated.",0x00ff00)] })
-				return
+				return interaction.followUp({ embeds: [genEmbed("Account","Your username has been updated.",0x00ff00)] }).catch(()=>{});
 			}
 			default: { await interaction.followUp({ content:"unknown subcommand" }) }
 		}

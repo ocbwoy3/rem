@@ -90,7 +90,7 @@ module.exports = {
 								description: `Your handle is invalid. Try another handle.\n\`\`\`\n${isValid}\n\`\`\``,
 								color: 0xff0000
 							}
-							return interaction.reply({ embeds: [embed], ephemeral: true });
+							return interaction.reply({ embeds: [embed], ephemeral: true }).catch(()=>{});
 						}
 
 						prisma.user.update({
@@ -127,17 +127,17 @@ module.exports = {
 									description: `Your handle has been successfully changed.\nYour new handle is under \`${atproto_url}\`, the record management was successful.`,
 									color: 0x00ff00
 								}
-								return interaction.reply({ embeds: [embed], ephemeral: true });
+								return interaction.reply({ embeds: [embed], ephemeral: true }).catch(()=>{});
 							}
 	
-							return interaction.reply({ embeds: [embed], ephemeral: true });
+							return interaction.reply({ embeds: [embed], ephemeral: true }).catch(()=>{});
 						}).catch((err: string)=>{
 							let embed: APIEmbed = {
 								title: "Error",
 								description: `Could not update your handle. Most likely it's in use by a different user.\n\`\`\`\n${err}\n\`\`\``,
 								color: 0xff0000
 							}
-							return interaction.reply({ embeds: [embed], ephemeral: true });
+							return interaction.reply({ embeds: [embed], ephemeral: true }).catch(()=>{});
 						})
 					};
 					case "resolve": {
@@ -152,7 +152,7 @@ module.exports = {
 							],
 							color: 0x00ff00
 						}
-						return interaction.reply({ embeds: [embed] });
+						return interaction.reply({ embeds: [embed] }).catch(()=>{});
 					};
 					default: { await interaction.reply({ content:"unknown subcommand" }) };
 				}
