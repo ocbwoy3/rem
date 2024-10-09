@@ -395,7 +395,7 @@ client.on(Events.InteractionCreate, async(interaction: Interaction) => {
 			await command.execute(interaction, executionContext);
 		} catch (error) {
 			console.error(error);
-			captureException(e_,{
+			captureException(error,{
 				data:{
 					user: interaction.user.id,
 					autocomplete: interaction.isAutocomplete(),
