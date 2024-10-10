@@ -313,13 +313,13 @@ module.exports = {
 				} 
 				switch (subcommand) {
 					case "ban": {
-						addToLog("User Banned from REM",{moderator: interaction.user, userBanned: `<@${(interaction.options.get('reason') as any).value}>`},0xff0000);
+						addToLog("User Banned from REM",{moderator: interaction.user, userBanned: `<@${(interaction.options.get('user') as any).value}>`},0xff0000);
 						await banUser((interaction.options.get('user') as any).value,(interaction.options.get('reason') as any).value,interaction.user.id);
 						await interaction.followUp({ content: `Sucessfully banned <@${(interaction.options.get('user') as any).value}> from REM!` });
 						return;
 					}
 					case "unban": {
-						addToLog("User Unbanned from REM",{moderator: interaction.user, userUnbanned: `<@${(interaction.options.get('reason') as any).value}>`},0x00ff00);
+						addToLog("User Unbanned from REM",{moderator: interaction.user, userUnbanned: `<@${(interaction.options.get('user') as any).value}>`},0x00ff00);
 						await unbanUser((interaction.options.get('user') as any).value);
 						await interaction.followUp({ content: `Sucessfully unbanned <@${(interaction.options.get('user') as any).value}> from REM!` });
 						return;
