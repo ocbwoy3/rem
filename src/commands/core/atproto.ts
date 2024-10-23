@@ -138,7 +138,8 @@ module.exports = {
 								color: 0xff0000
 							}
 							return interaction.reply({ embeds: [embed], ephemeral: true }).catch(()=>{});
-						})
+						});
+						return;
 					};
 					case "resolve": {
 						const data: AtprotoData = await resolveHandleAtprotoData(interaction.options.get('handle')?.value as string)
