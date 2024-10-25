@@ -25,7 +25,8 @@ function genEmbed(title: string, desc:string, col:number): APIEmbed {
 
 const runtime: REMRuntime = (getGlobalRuntime() as REMRuntime)
 
-module.exports = {
+export default {
+	cooldown: 1.5,
 	data: new SlashCommandBuilder()
 		.setName('anonymous')
 		.setDescription('Set your anonymous mode')

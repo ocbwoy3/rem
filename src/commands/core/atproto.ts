@@ -13,7 +13,8 @@ import { getUserInfo, prisma } from "../../api/db/Prisma";
 import { isValidHandle } from "../../api/atproto/HandleUtil";
 import { addToLog } from "../../api/Bot";
 
-module.exports = {
+export default {
+	cooldown: 5,
 	data: new SlashCommandBuilder()
 		.setName('atproto')
 		.setDescription('Use the AT Protocol')
@@ -124,7 +125,7 @@ module.exports = {
 							if (new_handle.endsWith(atproto_url.replace("*",""))) {
 								let embed: APIEmbed = {
 									title: "Success",
-									description: `Your handle has been successfully changed.\nYour new handle is under \`${atproto_url}\`, the record management was successful.`,
+									description: `Your handle has been successfully changed.\nYour new handle is under \`${atproto_url}\`, the record management was done automatically.`,
 									color: 0x00ff00
 								}
 								return interaction.reply({ embeds: [embed], ephemeral: true }).catch(()=>{});

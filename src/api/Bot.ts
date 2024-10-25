@@ -41,6 +41,7 @@ import { GetFFlag } from "./db/FFlags";
 import { GenerateResponse } from "./skidtru/ResponseGenerator";
 import { Console, error } from "node:console";
 import { captureException } from "@sentry/node";
+import Module from "node:module";
 
 const intents = [
 	GatewayIntentBits.Guilds,
@@ -102,6 +103,8 @@ export async function addToLog(title: string, data:{[a:string]: (User|Session|st
 	})
 }
 
+client.cooldowns = new Collection();
+
 async function registerCommands() {
 	client.commands = new Collection()
 
@@ -113,16 +116,22 @@ async function registerCommands() {
 	for (const folder of commandFolders) {
 		// Grab all the command files from the commands directory you created earlier
 		const commandsPath = path.join(foldersPath, folder);
-		const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+		const commandFiles = fs.readdirSync(commandsPath).filter(file => (file.endsWith('.js') || file.endsWith(".ts")));
+		console.log(commandsPath,commandFiles)
 		// Grab the SlashCommandBuilder#toJSON() output of each command's data for deployment
 		for (const file of commandFiles) {
-			const filePath = path.join(commandsPath, file);
-			const command: CommandModuleExports = require(filePath);
-			if ('data' in command && 'execute' in command) {
-				commands.push(command.data.toJSON());
-				client.commands.set(command.data.name, command)
-			} else {
-				console.warn(`[REM/Bot:registerCommands] The command at ${filePath} is missing a required "data" or "execute" property.`);
+			try {
+				const filePath = path.join(commandsPath, file);
+				const command: CommandModuleExports = (require(filePath) as any).default;
+				if ('data' in command && 'execute' in command) {
+					commands.push(command.data.toJSON());
+					client.commands.set(command.data.name, command)
+				} else {
+					console.warn(`[REM/Bot:registerCommands] The command at ${filePath} is missing a required "data" or "execute" property.`);
+				}
+			} catch(e_) {
+				captureException(e_)
+				console.error(`[REM/Bot] Cannot load command ${file} from ${commandsPath} - ${e_}`)
 			}
 		}
 	}
@@ -130,23 +139,21 @@ async function registerCommands() {
 	// Construct and prepare an instance of the REST module
 	const rest = new REST().setToken(process.env.TOKEN as string);
 
-	// and deploy your commands!
-	await (async () => {
-		try {
-			console.log(`[REM/Bot:registerCommands] Started refreshing ${commands.length} command(s).`);
+	try {
+		console.log(`[REM/Bot:registerCommands] Started refreshing ${commands.length} command(s).`);
 
-			// The put method is used to fully refresh all commands in the guild with the current set
-			const data = await rest.put(
-				Routes.applicationCommands(process.env.APP_ID as string),
-				{ body: commands },
-			);
+		// The put method is used to fully refresh all commands in the guild with the current set
+		const data = await rest.put(
+			Routes.applicationCommands(process.env.APP_ID as string),
+			{ body: commands },
+		);
 
-			console.log(`[REM/Bot:registerCommands] Successfully reloaded ${(data as any).length} command(s).`);
-		} catch (error) {
-			// And of course, make sure you catch and log any errors!
-			console.error(error);
-		}
-	})();
+		console.log(`[REM/Bot:registerCommands] Successfully reloaded ${(data as any).length} command(s).`);
+	} catch (error) {
+		// And of course, make sure you catch and log any errors!
+		// console.error(error);
+	}
+
 }
 
 client.on('ready', async () => {
@@ -165,7 +172,7 @@ var executionContext: REMRuntime | null = null;
 export function setExecutionContext(newContext: REMRuntime | null): void {
 	executionContext = newContext
 }
-2
+
 client.on(Events.MessageCreate, async(message: Message) => {
 	if (message.author.id.toString() in Blacklist) return;
 	if (message.author.id === message.client.user.id) return;
@@ -199,6 +206,11 @@ client.on(Events.MessageCreate, async(message: Message) => {
 		if (cont.length > 2000) return;
 		if (cont.length === 0) return;
 		
+		const ud = await getUserInfo(message.author.id)
+		let dn = message.member?.displayName || "rem_undefined_nick";
+
+		if (ud.bskyName !== "") { dn = "[BSKY] " + ud.bskyName };
+
 		if ((await getAnonymous(message.author.id)) && !(await GetFFlag("DFFlagCIA"))) {
 			await ses.queueMessage(
 				"Anonymous",
@@ -206,10 +218,10 @@ client.on(Events.MessageCreate, async(message: Message) => {
 				cont
 			)
 		} else {
-			let nick = (message.member?.displayName.slice(0,50) || "rem_undefined_nick")
+			let nick = (dn.slice(0,50))
 			if ((await GetFFlag("DFFlagChatMessageHandles")) === true) {
-				const ud = await getUserInfo(message.author.id)
 				nick = `@${ud.atprotoHandle}`
+				if (ud.bskyHandleDid !== "") { nick = `[BSKY] @${ud.bskyHandle}` };
 			}
 			await ses.queueMessage(
 				nick,
@@ -352,7 +364,7 @@ client.on(Events.InteractionCreate, async(interaction: Interaction) => {
 						.replace("/","/")
 					}`
 					// session.queueMessage("REM","ff0000",`Instance DID: ${instanceThing}`).catch(()=>{})
-					session.queueMessage("REM","ff0000",`Session accepted by @${ud.atprotoHandle}\nActor DID: ${ud.atprotoDid}`).catch(()=>{});
+					session.queueMessage("REM","ff0000",`Session accepted by @${(ud.bskyHandle !== "") ? ud.bskyHandle : ud.atprotoHandle}\nActor DID: ${(ud.bskyHandleDid !== "") ? `${ud.bskyHandleDid} (Bluesky)` : ud.atprotoDid}`).catch(()=>{});
 				}, 5000);
 
 				new Promise(async () => {
@@ -389,6 +401,26 @@ client.on(Events.InteractionCreate, async(interaction: Interaction) => {
 				ephemeral: true
 			})
 			return;
+		}
+
+		if (!client.cooldowns.has(command.data.name)) {
+			client.cooldowns.set(command.data.name, new Collection());
+		}
+
+		const now = Date.now();
+		const timestamps = client.cooldowns.get(command.data.name);
+		const cooldownAmount = (command.cooldown ? (command.cooldown * 1_000) : 0);
+
+		const expirationTime = timestamps.get(interaction.user.id) + cooldownAmount;
+
+		if (now < expirationTime) {
+			const expiredTimestamp = Math.round(expirationTime / 1_000);
+			return interaction.reply({ content: `This command is on cooldown. You can use it again <t:${expiredTimestamp}:R>.`, ephemeral: true }).catch(()=>{});
+		}
+
+		if (command.cooldown) {
+			timestamps.set(interaction.user.id, now);
+			setTimeout(() => timestamps.delete(interaction.user.id), cooldownAmount);
 		}
 
 		try {

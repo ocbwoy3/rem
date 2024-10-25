@@ -8,7 +8,7 @@ import {
 } from "discord.js";
 
 
-module.exports = {
+export default {
 	gdpr: true,
 	moderation_bypass: true,
 	data: new SlashCommandBuilder()

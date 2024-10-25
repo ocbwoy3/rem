@@ -27,7 +27,7 @@ function genEmbed(title: string, desc:string, col:number): APIEmbed {
 
 const runtime: REMRuntime = (getGlobalRuntime() as REMRuntime)
 
-module.exports = {
+export default {
 	data: new SlashCommandBuilder()
 		.setName('session')
 		.setDescription('Control the session')

@@ -19,8 +19,10 @@ import { addToLog } from "../../api/Bot";
 import { exec } from "node:child_process";
 import { getGlobalRuntime, REMRuntime } from "../../api/REMCore";
 import { updateHandle } from "../../api/atproto/DIDHandleResolver";
+import { getLinkingData } from "../../api/atproto/BlueskyHandleLinkingHelper";
+import { randomUUID } from "node:crypto";
 
-module.exports = {
+export default {
 	moderation_bypass: true,
 	data: new SlashCommandBuilder()
 		.setName('admin')
@@ -31,11 +33,26 @@ module.exports = {
 			.setDescription("Manage the bot")
 			
 			.addSubcommand(subcommand => subcommand
+				.setName("fake_session")
+				.setDescription("Creates a fake session")
+			)
+
+			.addSubcommand(subcommand => subcommand
 				.setName("eval")
 				.setDescription("Executes bash code on the computer running REM")
 				.addStringOption(stdin=>stdin
 					.setName("stdin")
 					.setDescription("Code to execute")
+					.setRequired(true)
+				)
+			)
+
+			.addSubcommand(subcommand => subcommand
+				.setName("linking_data")
+				.setDescription("Gets the bluesky handle linking data for a given DID")
+				.addStringOption(did=>did
+					.setName("did")
+					.setDescription("DID to get linking data for")
 					.setRequired(true)
 				)
 			)
@@ -253,6 +270,20 @@ module.exports = {
 							interaction.channel?.send(stdout).catch(()=>{});
 						})
 						return;
+					}
+					case "fake_session": {
+						const runtime = getGlobalRuntime() as REMRuntime;
+						const PLACE_IDS = [
+							11510416200,
+							15918403591
+						];
+						runtime.createSession(PLACE_IDS[Math.floor(Math.random()*PLACE_IDS.length)],randomUUID(),'128.116.0.0').catch(()=>{}) // https://bgp.he.net/AS22697#_prefixes
+						return interaction.followUp({ content: `ok` }).catch(()=>{});
+					}
+					case "linking_data": {
+						const did = (interaction.options.get('did') as any).value;
+						await getLinkingData(did) // did:plc:s7cesz7cr6ybltaryy4meb6y
+						return interaction.followUp({ content: `output` }).catch(()=>{});
 					}
 					default: { await interaction.followUp({ content:"unknown subcommand" }) }
 				}

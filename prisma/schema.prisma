@@ -10,34 +10,72 @@ datasource db {
 	url      = env("DATABASE_URL")
 }
 
+// ShowNameMode
+// 1 - DISCORD_NICK
+// 2 - DISCORD_USER
+// 3 - ATP_HANDLE
+// 4 - BSKY_HANDLE
+// 5 - BSKY_NAME
+
 model User {
 
-	discordUserId       String   @id @unique
-	RobloxUsername      String   @default("REM_UNDEFINED_USERNAME")
+	// User Info
+	discordUserId    String   @id @unique
+	RobloxUsername   String   @default("REM_UNDEFINED_USERNAME")   // Script generation command
 	
-	coins               Int      @default(0)
+	// Sessions
+	useBlueskyHandle    Boolean   @default(false)
+	isAnonymous         Boolean   @default(false)
+
+	// Economy and Leveling
+	coins              Int                  @default(0)    // WIP
+	experiencePoints   Int                  @default(0)    // WIP
+	experienceLevel    Int                  @default(0)    // WIP
+	purchases          UserShopPurchase[]   @ignore        // WIP
 	
-	isAdmin             Boolean  @default(false)
-	isAnonymous         Boolean  @default(false)
-	skidtruWhitelist    Boolean  @default(false)
+	// Permissions
+	isAdmin            Boolean   @default(false)
+	skidtruWhitelist   Boolean   @default(false)
 	
-	handleChangeBanned  Boolean  @default(false)
+	// Restrictions
+	handleChangeBanned   Boolean   @default(false)
+	isExtremist          Boolean   @default(false) @ignore
+
+	// Bluesky Handle Linking
+	bskyHandle        String   @default("")   //  Bluesky handle of linked account
+	bskyName          String   @default("")   //  Display name of the user on Bluesky
+	bskyHandleDid     String   @default("")   //  DID of linked account
+	bskyHandleProof   String   @default("")   //  Handle linking proof (see /src/api/atproto/BlueskyHandleLinkingHelper.ts)
+	bskyHandlePDS     String   @default("")   //  PDS of this REM Instance
+
+	// ATProto info
+	atprotoHandle       String   @unique   //  The handle of the user, for example: alice.ocbwoy3.dev
+	atprotoDid          String   @unique   //  The DID identifier of the user
+	atprotoSigningKey   String             //  The atproto signing key
+	atprotoPrivateKey   String             //  Private Key
+
+}
+
+model UserShopPurchase {
+
+	@@ignore
+
+	buyerId   String
+	user      User     @relation(fields: [buyerId], references: [discordUserId])
 	
-	atprotoHandle       String   @unique                             //  The handle of the user, for example: alice.ocbwoy3.dev
-	atprotoDid          String   @unique                             //  The DID identifier of the user
-	
-	atprotoSigningKey   String                                       //  The atproto signing key
-	atprotoPrivateKey   String                                       //  Private Key
+	purchaseId   String     @id @unique @default(uuid())
+	dateBought   DateTime   @default(now())
+	itemId       String
 
 }
 
 model PrikolsHubServiceBan {
-	discordUserId  String  @id @unique
+	discordUserId  String   @id @unique
 	reason         String
-	moderatorId    String              // discord userid of the moderator
+	moderatorId    String                 // ID of moderator
 }
 
 model FeatureFlag {
-	name   String   @id @unique
-	state  Boolean
+	name    String    @id @unique
+	state   Boolean
 }

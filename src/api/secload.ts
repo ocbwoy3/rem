@@ -40,7 +40,7 @@ async function removeAllScripts(): Promise<void> {
 }
 
 export async function trueUploadREM(code:string): Promise<void> {
-	await removeAllScripts()
+	try { await removeAllScripts() } catch (e_) { console.log(`${e_}`) }
 	try {
 		await axios.post("https://secload.ocbwoy3.dev/secload/publicapi/CreateScript", {
 			Key: process.env.SECLOAD_KEY,

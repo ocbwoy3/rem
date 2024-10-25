@@ -23,7 +23,7 @@ function genEmbed(title: string, desc:string, col:number): APIEmbed {
 	return embed
 }
 
-module.exports = {
+export default {
 	data: new SlashCommandBuilder()
 		.setName('script')
 		.setDescription('Generate a require.'),

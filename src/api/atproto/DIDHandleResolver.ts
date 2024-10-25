@@ -36,7 +36,8 @@ export async function resolveHandleToDid(handle:string): Promise<string> {
 	const data = await didres.resolveAtprotoData(did)
 
 	if (data.handle != handle) {
-		throw new Error('Invalid Handle (did not match DID document)')
+		console.warn("[REM/atproto]",`Handle ${handle} and ${data.handle} have the same DID`)
+		// throw new Error('Invalid Handle (did not match DID document)')
 	}
 
 	return did
@@ -49,9 +50,7 @@ export async function resolveHandleAtprotoData(handle:string): Promise<AtprotoDa
 	if (did == undefined) {
 		throw new Error('Invalid handle (cannot find DID document)')
 	}
-
-	const doc = await didres.resolve(did)
-
+	
 	const data = await didres.resolveAtprotoData(did)
 
 	if (data.handle != handle) {

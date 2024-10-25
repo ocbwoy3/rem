@@ -5,6 +5,7 @@ import { SlashCommandBuilder } from "discord.js"
 export type CommandModuleExports = {
 	gdpr?: boolean, // Defines if the command is GDPR-related (will only allow European users to use)
 	moderation_bypass?: boolean, // Defines if the user should be allowed to use the command if they are banned
+	cooldown?: number,
 	data: SlashCommandBuilder,
 	execute: Function
 }

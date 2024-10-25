@@ -46,14 +46,18 @@ app.use((req, res, next) => {
 });
 
 export let cachedGitBranchName = "unknown";
-export let gitCommitHash = readFileSync(".git/ORIG_HEAD").toString().trim().substring(0,8)
+export let cachedGitCommitHash = "git";
 
 exec("git branch --show-current",(_,stdout:string)=>{
 	cachedGitBranchName = stdout.trim()
 })
 
+exec("git rev-parse --short HEAD",(_,stdout:string)=>{
+	cachedGitCommitHash = stdout.trim()
+})
+
 app.get("/",(req,res)=>{
-	res.contentType("text/plain").send(`rem ${cachedGitBranchName}@${gitCommitHash} - https://github.com/ocbwoy3/rem
+	res.contentType("text/plain").send(`rem ${cachedGitBranchName}@${cachedGitCommitHash} - https://github.com/ocbwoy3/rem
 
 Most API routes are under /xrpc/`)
 })

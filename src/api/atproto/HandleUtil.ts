@@ -10,21 +10,18 @@ const atpUrlCheckRegExp = new RegExp(`^${atproto_url
 
 const blacklistedDomains: RegExp[] = [
 
-	// russian sites
+	// tld
 
 	/\.ru$/,
 	/\.рф$/,
 	/\.xn\-\-p1ai$/,
+	/\.gop$/,
+	/\.republican$/,
 
 	// websites
 
 	/(\.|^)gov\.lv$/,
-	/(\.|^)neplp\.lv$/,
-	/(\.|^)president\.lv$/,
 	/(\.|^)cia\.gov$/,
-
-	// social media
-
 	/(\.|^)trump(hotels|golf|internationalreality|store)?\.com$/,
 	/(\.|^)booktrumpgolf\.com$/,
 	/(\.|^)x\.com$/,

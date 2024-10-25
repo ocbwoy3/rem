@@ -27,7 +27,7 @@ function formatBytes(bytes: number, decimals = 2, noext:boolean=false): string {
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))}${ noext ? "" : ` ${sizes[i]}`}`
 }
 
-module.exports = {
+export default {
 	data: new SlashCommandBuilder()
 		.setName('sysinfo')
 		.setDescription('Provides information about the device REM is running on.'),

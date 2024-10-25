@@ -31,7 +31,6 @@ import { configDotenv } from "dotenv";
 configDotenv()
 
 // Load Sentry
-import * as Sentry from "@sentry/node";
 import "./api/instrument";
 
 import { version } from "../package.json";
@@ -50,6 +49,7 @@ import { setCookie } from "noblox.js";
 import * as server from "./api/Server"
 import { prisma } from "./api/db/Prisma";
 import { GetFFlag, InitFFlags } from "./api/db/FFlags";
+import { runDBJob } from "./api/db/BlueskyConnectionValidationJob";
 
 const client: Client = djs_client
 
@@ -82,9 +82,9 @@ client.on('ready',async()=>{
 	const userinfo = await setCookie(process.env.ROBLOSECURITY as string)
 	console.log(`[REM/Roblox] Logged in using token as ${userinfo.name} (${userinfo.id})`)
 	await Runtime.setup()
-
-	// await Runtime.createSession(11195100561,'d9b93c64-f1cd-41ce-ab05-7c33912fa688','192.168.1.1')
 	
+	setInterval(runDBJob, 900_000);
+
 	server.startApp()
 })
 
