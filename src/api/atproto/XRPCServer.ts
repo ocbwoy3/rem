@@ -8,7 +8,7 @@ import * as LexiconRegistrate from './LexiconRegistrate';
 export async function loadLexicons() {
 	// console.log(__dirname)
 	const lexiconFolder = path.join(__dirname, '..', '..', 'lexicons');
-	const lexiconFiles = fs.readdirSync(lexiconFolder).filter(file => file.endsWith('.js'));
+	const lexiconFiles = fs.readdirSync(lexiconFolder).filter(file => (file.endsWith('.js')||file.endsWith('.ts')));
 	
 	for (const file of lexiconFiles) {
 		const filePath = path.join(lexiconFolder,file)
