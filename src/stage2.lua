@@ -164,6 +164,7 @@ local API = (function()
 		for a,b in pairs(allModules) do
 			local success,reason = pcall(function()
 
+				messaging:Do("REMAddonLoader","loading addon from lexicon loader.rem.modules.download?file="..tostring(b)..","ff0000")
 				local success, fileContent = pcall(function()
 					return atproto.lex.loader.rem.modules.download("?file="..tostring(b))
 				end)

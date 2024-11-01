@@ -1,4 +1,4 @@
-import express, { response } from "express";
+import express, { Request, response, Router } from "express";
 import * as swagger from "swagger-ui-express";
 import * as config from "../../config.json"
 import { loadLexicons, makeServer } from "./atproto/XRPCServer";
@@ -11,8 +11,11 @@ import { GetAllFFlags } from "./db/FFlags";
 import { readFileSync } from "fs";
 import { exec } from "child_process";
 import { prisma } from "./db/Prisma";
+import WebSocket, { Server } from "ws";
+import expressWs, { Router as wsRouter } from "express-ws";
+import { createServer } from "http";
 
-export const app = express()
+export const app = expressWs(express()).app;
 console.log(`[REM/Sentry] Set up Express error handler`)
 Sentry.setupExpressErrorHandler(app)
 
@@ -74,6 +77,15 @@ app.get("/api/fflag_doc.json",async(req,res)=>{
 	res.set('Cache-Control','no-store').contentType("application/json").send(JSON.stringify(FFlagDoc,null,4))
 })
 
+
+const router = Router() as wsRouter;
+
+router.ws("/gateway",(ws: WebSocket, req: Request)=>{
+	ws.send("THIS IS A TEST");
+	ws.close();
+})
+
+app.use(router);
 
 export function startApp() {
 	
