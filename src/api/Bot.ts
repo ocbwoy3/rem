@@ -261,7 +261,7 @@ client.on(Events.InteractionCreate, async(interaction: Interaction) => {
 				if (search.value.length > 0) {
 					if (!(`${p[0]} (@${p[1]}, ${p[2]})`.toLowerCase().includes(search.value.toLocaleLowerCase()))) return;
 				}
-				plrs.push({ name: `${p[0]} (@${p[1]}, ${p[2]})`, value: p[0] }) 
+				plrs.push({ name: `${p[0]} (@${p[1]}, ${p[2]})`, value: p[1] }) 
 			});
 
 			// console.log(plrs, plrs.length)
