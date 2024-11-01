@@ -2,6 +2,7 @@ API:OnCommand("execute",function(args)
 	task.defer(function()
 		local owner = game:GetService("Players"):FindFirstChild(args[2] or "{}")
 		local success, reason = loadstring(args[1])
+		print(table.concat(args," | "))
 		if success then
 			getfenv(success).owner = owner
 			getfenv(success).API = nil
