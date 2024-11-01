@@ -95,7 +95,7 @@ export default {
 				return
 			}
 			case "kick": {
-				const plr: string = (interaction.options.get('owner')?.value || "[none]") as string;
+				const plr: string = (interaction.options.get('player')?.value || "[none]") as string;
 				const reason: string = (interaction.options.get('reason')?.value || "You have been kicked from the server.") as string;
 				await ses.queueCommands("kick",[plr.slice(0,25),reason.slice(0,100)])
 				addToLog("Player Kicked",{user: interaction.user, session: ses, owner: plr.slice(0,25), reason: reason.slice(0,100) },0xff00ff);
