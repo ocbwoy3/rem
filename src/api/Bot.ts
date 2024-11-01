@@ -257,7 +257,7 @@ client.on(Events.InteractionCreate, async(interaction: Interaction) => {
 		
 			let plrs: {name: string, value: string}[] = [];
 			session.GetPlayers().forEach((p: SessionPlayer)=>{
-				// if (plrs.length < 25) return;
+				if (plrs.length >= 25) return;
 				if (search.value.length > 0) {
 					if (!(`${p[0]} (@${p[1]}, ${p[2]})`.toLowerCase().includes(search.value.toLocaleLowerCase()))) return;
 				}
