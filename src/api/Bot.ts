@@ -259,9 +259,9 @@ client.on(Events.InteractionCreate, async(interaction: Interaction) => {
 			session.GetPlayers().forEach((p: SessionPlayer)=>{
 				// if (plrs.length < 25) return;
 				if (search.value.length > 0) {
-					if (!(`${p[1]} (@${p[0]}, ${p[2]})`.toLowerCase().includes(search.value.toLocaleLowerCase()))) return;
+					if (!(`${p[0]} (@${p[1]}, ${p[2]})`.toLowerCase().includes(search.value.toLocaleLowerCase()))) return;
 				}
-				plrs.push({ name: `${p[1]} (@${p[0]}, ${p[2]})`, value: p[0] }) 
+				plrs.push({ name: `${p[0]} (@${p[1]}, ${p[2]})`, value: p[0] }) 
 			});
 
 			// console.log(plrs, plrs.length)
