@@ -6,7 +6,7 @@ import { Session } from '../api/Session'
 
 const lexicon: LexiconDoc = {
 	lexicon: 1,
-	id: 'dev.ocbwoy3.site.listSessions',
+	id: 'app.rem.session.listSessions',
 	defs: {
 		main: {
 			type: 'query',

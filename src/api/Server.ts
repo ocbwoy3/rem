@@ -11,9 +11,12 @@ import { GetAllFFlags } from "./db/FFlags";
 import { readFileSync } from "fs";
 import { exec } from "child_process";
 import { prisma } from "./db/Prisma";
-import WebSocket, { Server } from "ws";
+import WebSocket, { AddressInfo, MessageEvent, Server } from "ws";
 import expressWs, { Router as wsRouter } from "express-ws";
 import { createServer } from "http";
+import { isValidJwt } from "./atproto/JwtTokenHelper";
+import { PDS_DID } from "./atproto/BlueskyHandleLinkingHelper";
+import { REMGlobalEventsWS, SocketRecvMessageType, SocketSendMessageType } from "./RemUISocketHelper";
 
 export const app = expressWs(express()).app;
 console.log(`[REM/Sentry] Set up Express error handler`)
@@ -37,7 +40,9 @@ app.get("/.well-known/atproto-did", async(req, res)=>{
 app.use((req, res, next) => {
 	const userAgent: string = req.get('user-agent')?.toLowerCase() || "googlebot";
   
-	// res.set('Cache-Control','no-store')
+	// wtf is cors??????
+	res.set('Access-Control-Allow-Origin','*')
+	res.set('Access-Control-Allow-Headers','*')
 
 	if (!userAgent.includes('googlebot')) {
 		next();
@@ -77,12 +82,90 @@ app.get("/api/fflag_doc.json",async(req,res)=>{
 	res.set('Cache-Control','no-store').contentType("application/json").send(JSON.stringify(FFlagDoc,null,4))
 })
 
-
 const router = Router() as wsRouter;
 
-router.ws("/gateway",(ws: WebSocket, req: Request)=>{
-	ws.send("THIS IS A TEST");
-	ws.close();
+router.ws("/remui/socket",async(ws: WebSocket, req: Request)=>{
+	
+	console.log(`[REM/Socket] New connection from ${req.socket.remoteAddress || req.socket.localAddress}`)
+
+	if (!(req.headers.authorization || req.query.jwt)) {
+		ws.close(1000,"Unauthorized");
+		return;
+	};
+
+	const ownerDid = await isValidJwt(req.query.jwt as string);
+
+	if (!ownerDid) {
+		ws.close(1000,"Unauthorized - Invalid JWT, is it expired?");
+		return;
+	};
+	
+	console.log(`[REM/Socket] ${req.socket.remoteAddress || req.socket.localAddress} logged in as ${ownerDid}`)
+
+	let acknowledged = false;
+	let _res = (a:any)=>{}
+
+	ws.onmessage = (me: MessageEvent) => {
+		const msg = me.data.toString("utf-8");
+		// console.log(msg) // TODO: RemUI framework
+		try {
+			const mt = msg.toString();
+			if (mt.length > 25) return;
+			const m = JSON.parse(mt);
+			if (m.t === SocketRecvMessageType.ACK.valueOf()) {
+				acknowledged = true;
+				try { _res(true) } catch {};
+				ws.send(JSON.stringify({
+					t: SocketSendMessageType.ACK
+				}))
+			}	
+		} catch(e_) {console.error(e_)};
+	}
+
+	await new Promise((resolve)=>{
+		_res = resolve;
+		setTimeout(() => { try { resolve(true) } catch {} }, 2000);
+	});
+
+	if (acknowledged === false) {
+		ws.close(1000,"Did not acknowledge to connection.")
+	}
+
+	ws.send(JSON.stringify({
+		t: SocketSendMessageType.WELCOME,
+		c: {
+			pds: PDS_DID,
+			did: ownerDid
+		}
+	}));
+
+	ws.send(JSON.stringify({
+		t: SocketSendMessageType.MESSAGE,
+		c: {
+			user: "SYSTEM",
+			id: 1,
+			msg: `Welcome to this REM instance. You are connected to ${PDS_DID} as ${ownerDid}`,
+			ji: "REM Global Chat"
+		}
+	}))
+
+	const cb2 = (m:any)=>{
+		ws.send(JSON.stringify(m))
+	}
+
+	REMGlobalEventsWS.on('send',cb2)
+
+	const cb3 = ()=>{
+		try { ws.close() } catch {};
+		REMGlobalEventsWS.removeListener('send',cb2);
+		REMGlobalEventsWS.removeListener('close',cb3);
+	}
+
+	ws.onclose = cb3;
+
+	if (ws.readyState !== ws.OPEN) cb3();
+
+
 })
 
 app.use(router);

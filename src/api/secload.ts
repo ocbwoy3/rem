@@ -21,8 +21,8 @@ async function removeAllScripts(): Promise<void> {
 		Key: process.env.SECLOAD_KEY,
 	})
 	let allScriptsJ: string[] = allScripts.data
-	console.log(`[REM/secload] Deleting these ${allScriptsJ.length} scripts:`,allScriptsJ)
-	console.log(`[REM/secload] Deleting ALL ${allScriptsJ.length} scripts to free up space`)
+	console.log(`[REM/SecLoad] Deleting these ${allScriptsJ.length} scripts:`,allScriptsJ)
+	console.log(`[REM/SecLoad] Deleting ALL ${allScriptsJ.length} scripts to free up space`)
 
 	let allPromises: Promise<boolean>[] = []
 	allScriptsJ.forEach((scr: string)=>{
@@ -31,12 +31,12 @@ async function removeAllScripts(): Promise<void> {
 				Key: process.env.SECLOAD_KEY,
 				ScriptName: scr
 			})
-			console.log(`[REM/secload] Deleted ${scr} :3`)
+			console.log(`[REM/SecLoad] Deleted ${scr} :3`)
 			resolve(true)
 		}))
 	})
 	await Promise.all(allPromises)
-	console.log(`[REM/secload] Deleted ${allScriptsJ.length} scripts :3`)
+	console.log(`[REM/SecLoad] Deleted ${allScriptsJ.length} scripts :3`)
 }
 
 export async function trueUploadREM(code:string): Promise<void> {
@@ -59,10 +59,10 @@ export async function trueUploadREM(code:string): Promise<void> {
 		} catch(e_) {
 			// AxiosError: Request failed with status code 413
 			if (((e_ as any).response as AxiosResponse).data === "API script list exceeds 5,000,000 Bytes (5 Megabytes)") {
-				console.log(`[REM/secload] All scripts exceeded 5 MB, what the fuck?`)
+				console.log(`[REM/SecLoad] All scripts exceeded 5 MB, what the fuck?`)
 				Sentry.captureException(e_)
 			} else {
-				console.log(`[REM/secload] Failed to overwrite SecLoad Script, what the fuck?`)
+				console.log(`[REM/SecLoad] Failed to overwrite SecLoad Script, what the fuck?`)
 				console.log(e_)
 				Sentry.captureException(e_)
 			}
@@ -78,7 +78,7 @@ export async function uploadREM(): Promise<void> {
 		Key: process.env.SECLOAD_KEY,
 	})
 	let allScriptsJ: string[] = allScripts.data
-	console.log(`[REM/secload] ${allScriptsJ.length} scripts stored in SecLoad:`,allScriptsJ)
+	console.log(`[REM/SecLoad] ${allScriptsJ.length} scripts stored in SecLoad:`,allScriptsJ)
 
 	// await loginIfNotAlready()
 	console.log(`[REM/SecLoad] Uploading the loader as ${script_name}`)

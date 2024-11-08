@@ -12,12 +12,24 @@ import { BotOwner, atproto_url } from "../../../config.json";
 import { getUserInfo, prisma } from "../../api/db/Prisma";
 import { isValidHandle } from "../../api/atproto/HandleUtil";
 import { addToLog } from "../../api/Bot";
+import { generateJwt } from "../../api/atproto/JwtTokenHelper";
 
 export default {
 	cooldown: 5,
 	data: new SlashCommandBuilder()
 		.setName('atproto')
 		.setDescription('Use the AT Protocol')
+
+		.addSubcommandGroup(group => group
+			.setName("jwt")
+			.setDescription("JWT token things")
+			
+			.addSubcommand(subcommand => subcommand
+				.setName("generate")
+				.setDescription("Generate a JWT access token linked to your account")
+			)
+
+		)
 
 		.addSubcommandGroup(group => group
 			.setName("identity")
@@ -77,6 +89,30 @@ export default {
 		*/
 
 		switch (subcommandG) {
+			case "jwt": {
+				switch (subcommand) {
+					case "generate": {
+						const userdata = await getUserInfo(interaction.user.id);
+						const newJWT = generateJwt(userdata.atprotoDid);
+						prisma.user.update({
+							where: {
+								discordUserId: interaction.user.id
+							},
+							data: {
+								jwtExpiry: Math.floor(Date.now() / 1000) + 7889238,
+								accessJwt: newJWT,
+								enableJwt: true
+							}
+						}).catch(()=>{});
+						let embed: APIEmbed = {
+							title: "Success",
+							description: `This is your access jwt for RemUI.\n\`\`\`\n${newJWT}\n\`\`\``,
+							color: 0x00ff00
+						}
+						return interaction.reply({ embeds: [embed], ephemeral: true }).catch(()=>{});
+					}
+				}
+			}
 			case "identity": {
 				switch (subcommand) {
 					case "change_handle": {

@@ -24,7 +24,8 @@ model User {
 	RobloxUsername   String   @default("REM_UNDEFINED_USERNAME")   // Script generation command
 	
 	// Sessions
-	useBlueskyHandle    Boolean   @default(false)
+	useBlueskyHandle    Boolean   @default(false) @ignore
+	showNameMode        Int       @default(1)
 	isAnonymous         Boolean   @default(false)
 
 	// Economy and Leveling
@@ -40,6 +41,7 @@ model User {
 	// Restrictions
 	handleChangeBanned   Boolean   @default(false)
 	isExtremist          Boolean   @default(false) @ignore
+	isDsaReported        Boolean   @default(false) @ignore   //  If the user broke EU law with this 
 
 	// Bluesky Handle Linking
 	bskyHandle        String   @default("")   //  Bluesky handle of linked account
@@ -48,11 +50,30 @@ model User {
 	bskyHandleProof   String   @default("")   //  Handle linking proof (see /src/api/atproto/BlueskyHandleLinkingHelper.ts)
 	bskyHandlePDS     String   @default("")   //  PDS of this REM Instance
 
-	// ATProto info
+	// Atproto info
 	atprotoHandle       String   @unique   //  The handle of the user, for example: alice.ocbwoy3.dev
 	atprotoDid          String   @unique   //  The DID identifier of the user
 	atprotoSigningKey   String             //  The atproto signing key
 	atprotoPrivateKey   String             //  Private Key
+
+	// Session Info
+	enableJwt   Boolean   @default(false)
+	jwtExpiry   Int       @default(0)
+	accessJwt   String    @unique @default(uuid())
+	
+	// RemUI Socket Info
+	trustedIpAddress   String   @default("")
+
+}
+
+model RemUIBannedIPAddress {
+
+	@@ignore
+
+	ipAddress   String   @unique @id
+	geoASN      String
+	geoPostal   String
+	reason      String   @default("Unspecified")
 
 }
 

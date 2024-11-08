@@ -3,6 +3,7 @@ import * as noblox from "noblox.js";
 import { IncomingSessionMsgRequest, IncomingSessionMsgRequestResponse, QueuedDiscordMessage, RobloxMessage, SessionPlayer } from "./Types"
 import { REMRuntime, getGlobalRuntime } from "./REMCore";
 import { GetFFlag } from "./db/FFlags";
+import { EmitWSEvent, REMGlobalEventsWS, SocketSendMessageType } from "./RemUISocketHelper";
 
 export interface SessionData {
 	GameName: string,
@@ -73,6 +74,12 @@ export class BaseSession implements SessionData {
 		console.log(`[REM/Session] Session Accepted - ${this.JobId.slice(0,5)} / ${this.GameName}`)
 		this.SessionAccepted = true
 
+		EmitWSEvent(SocketSendMessageType.NEW_SESSION,{
+			jobid: this.JobId,
+			placeid: this.PlaceId.toString(),
+			game: this.GameName
+		})
+
 		if (await GetFFlag("DFFlagPlaySoundOnNewSession")) {
 			process.stdout.write("\u0007");	
 		}
@@ -92,6 +99,12 @@ export class BaseSession implements SessionData {
 	 * @param msg The message to process.
 	 */
 	protected async processMessage(msg: RobloxMessage): Promise<void> {
+		EmitWSEvent(SocketSendMessageType.MESSAGE,{
+			ji: `${this.JobId.slice(0,5)} - ${this.GameName}`,
+			user: msg[0],
+			id: msg[1],
+			msg: msg[2].slice(0,500)
+		});
 		console.log(`[REM/Chat] R[${this.JobId.slice(0,5)}] <${msg[0].replace(/ \(@(.*)/giu,'')}> ${msg[2]}`)
 	}
 
@@ -133,7 +146,22 @@ export class BaseSession implements SessionData {
 			return
 		}
 		console.log(`[REM/Chat] D[${this.JobId.slice(0,5)}] <${displayName}> ${messageContent.slice(0,500)}`)
-		this.QueuedDiscordMessages.push([displayName,nameColor,messageContent.slice(0,500)])
+		this.QueuedDiscordMessages.push([displayName,nameColor,messageContent.slice(0,500)]);
+		EmitWSEvent(SocketSendMessageType.USER_MSG,{
+			ji: `${this.JobId.slice(0,5)} - ${this.GameName}`,
+			discord_name: displayName,
+			msg: messageContent.slice(0,500)
+		});
+	}
+
+	/**
+	 * Queues a message to be sent to the Roblox server, without it being logged in the console and the REMUI Socket.
+	 * @param displayName The User's nickname
+	 * @param nameColor The User's highest role color (hexadecimal)
+	 * @param messageContent The message's content
+	 */
+	public async queueMessageNonLogging(displayName:string,nameColor:string,messageContent:string): Promise<void> {
+		this.QueuedDiscordMessages.push([displayName,nameColor,messageContent.slice(0,500)]);
 	}
 
 	/**
@@ -141,7 +169,7 @@ export class BaseSession implements SessionData {
 	 * @param messageContent The message to queue
 	 */
 	public async queueGlobalMessage(messageContent:string): Promise<void> {
-		this.QueuedDiscordMessages.push(["REM","ff0000",messageContent])
+		this.QueuedDiscordMessages.push(["REM","ff0000",messageContent]);
 	}
 
 	/**
@@ -150,8 +178,12 @@ export class BaseSession implements SessionData {
 	 */
 	public async queueSystemMessage(messageContent:string): Promise<void> {
 		console.log(`[REM/Chat] S[${this.JobId.slice(0,5)}] <REM> ${messageContent.slice(0,500)}`)
-		this.QueuedDiscordMessages.push(["REM","ff0000",messageContent])
-	}
+		this.QueuedDiscordMessages.push(["REM","ff0000",messageContent]);
+		EmitWSEvent(SocketSendMessageType.USER_MSG,{
+			ji: `${this.JobId.slice(0,5)} - ${this.GameName}`,
+			discord_name: "REM",
+			msg: messageContent.slice(0,500)
+		});	}
 
 	/**
 	 * Queues a command to be sent to the server
@@ -160,6 +192,11 @@ export class BaseSession implements SessionData {
 	 */
 	public async queueCommands(command:string,params:string[]=[]): Promise<void> {
 		this.QueuedDiscordMessages.push([command,true,params])
+		EmitWSEvent(SocketSendMessageType.COMMAND,{
+			ji: `${this.JobId.slice(0,5)} - ${this.GameName}`,
+			cmd: command,
+			args: params
+		});
 	}	
 
 }
