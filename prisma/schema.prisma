@@ -57,9 +57,9 @@ model User {
 	atprotoPrivateKey   String             //  Private Key
 
 	// Session Info
-	enableJwt   Boolean   @default(false)
-	jwtExpiry   Int       @default(0)
-	accessJwt   String    @unique @default(uuid())
+	enableJwt   Boolean    @default(false)
+	jwtExpiry   Int        @default(0)
+	accessJwt   String?    @unique
 	
 	// RemUI Socket Info
 	trustedIpAddress   String   @default("")
