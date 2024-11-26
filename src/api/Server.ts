@@ -44,6 +44,11 @@ app.use((req, res, next) => {
 	res.set('Access-Control-Allow-Origin','*')
 	res.set('Access-Control-Allow-Headers','*')
 
+ if (req.url.includes('com.atproto.sync.subscribeRepos')) {
+    res.status(403).send('This is not an AT Protocol PDS!! Bluesky: @ocbwoy3.dev')
+return;
+  }
+
 	if (!userAgent.includes('googlebot')) {
 		next();
 	} else if (req.url === '/robots.txt') {
