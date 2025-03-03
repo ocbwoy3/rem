@@ -1,17 +1,9 @@
 import {
 	SlashCommandBuilder,
-	CommandInteraction,
-	GuildMember,
-	InteractionDeferReplyOptions,
-	Client,
-	APIEmbed,
-	Attachment
+	CommandInteraction, APIEmbed
 } from "discord.js";
-import { banUser, getUserAdmin, getUserInfo, getUsername, prisma, setUserAdmin, setUsername, unbanUser } from "../../api/db/Prisma";
-import { rm, rmSync } from "node:fs";
-import { downloadFile } from "../../api/Utility";
+import { getUserInfo, getUsername, prisma, setUsername } from "../../api/db/Prisma";
 import { getGlobalRuntime, REMRuntime } from "../../api/REMCore";
-import { Session } from "../../api/Session";
 import { addToLog } from "../../api/Bot";
 import { captureException } from "@sentry/node";
 import { generateUserLinkingHash, getBlueskyDetails, getLinkingData, PDS_DID } from "../../api/atproto/BlueskyHandleLinkingHelper";
@@ -127,7 +119,7 @@ export default {
 					case "gen_proof": {
 						const h = await generateUserLinkingHash(interaction.user.id);
 						const jc = JSON.stringify({
-							$type: "dev.ocbwoy3.rem.collection",
+							$type: "dev.ocbwoy3.rem.connection",
 							pds: PDS_DID,
 							proof: h
 						},undefined,"\t")
