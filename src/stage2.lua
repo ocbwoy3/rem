@@ -1,5 +1,3 @@
-P_SECRET="IjQh2he1ey0fd1yBmRLD"
-
 local NLS = require(16899242601)()
 
 local messaging = (function()

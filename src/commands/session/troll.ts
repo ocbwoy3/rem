@@ -38,6 +38,16 @@ export default {
 				.setRequired(false)
 				.setAutocomplete(true)
 			)
+		)
+		.addSubcommand(subcommand => subcommand
+			.setName("robloxterm")
+			.setDescription("Forces a player to say a bunch of slurs n shit")
+			.addStringOption(code=>code
+				.setName("owner")
+				.setDescription("The player to robloxterm")
+				.setRequired(false)
+				.setAutocomplete(true)
+			)
 		),
 		
 	async execute(interaction: CommandInteraction) {
@@ -56,7 +66,7 @@ export default {
 		switch (subcommand) {
 			case "chathax": {
 				if (!(await GetFFlag("DFFlagPublicChathax"))) {
-					await interaction.followUp({ content: "Code execution denied, as `DFFlagPublicChathax` is false.", ephemeral: true })
+					await interaction.followUp({ content: "Chathax denied, as `DFFlagPublicChathax` is false.", ephemeral: true })
 					return
 				}
 				const text: string = (interaction.options.get('text')?.value as string);
@@ -64,6 +74,17 @@ export default {
 				await ses.queueCommands("chathax",[text.slice(0,250),owner.slice(0,25)])
 				addToLog("Player chathaxed",{user: interaction.user, session: ses, code: `\`\`\`${text.slice(0,250)}\n\`\`\``, owner: owner.slice(0,25) },0xff00ff);
 				await interaction.followUp({ content: `Attempted to chathax!` })
+				return
+			}
+			case "robloxterm": {
+				if (!(await GetFFlag("DFFlagPublicChathax"))) {
+					await interaction.followUp({ content: "Robloxterm denied, as `DFFlagPublicChathax` is false.", ephemeral: true })
+					return
+				}
+				const owner: string = (interaction.options.get('owner')?.value || "[none]") as string;
+				await ses.queueCommands("robloxterm",[owner.slice(0,25)])
+				addToLog("Player robloxtermed",{user: interaction.user, session: ses, owner: owner.slice(0,25) },0xff00ff);
+				await interaction.followUp({ content: `Attempted to robloxterm!` })
 				return
 			}
 
