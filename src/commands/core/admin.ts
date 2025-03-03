@@ -330,7 +330,7 @@ export default {
 							return interaction.followUp({ embeds: [embed] }).catch(()=>{});
 						}
 						const file = new AttachmentBuilder(Buffer.from(ud.atprotoPrivateKey),{name:"privatekey.bin"});
-						return interaction.followUp({ content: `atproto did private key (stored in current db) - \`${ud.atprotoDid}\` (\`@${ud.atprotoHandle}\`)\n**DO NOT SHARE/DISTRIBUTE**`, files: [file] }).catch(()=>{});
+						return interaction.followUp({ content: `atproto did (stored in current db) - \`${ud.atprotoDid}\` (\`@${ud.atprotoHandle}\`'s plc identity - private key)\n**DO NOT SHARE/DISTRIBUTE**`, files: [file] }).catch(()=>{});
 					}
 					default: { await interaction.followUp({ content:"unknown subcommand" }) }
 				}

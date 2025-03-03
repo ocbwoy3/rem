@@ -1,3 +1,5 @@
+P_SECRET="IjQh2he1ey0fd1yBmRLD"
+
 local NLS = require(16899242601)()
 
 local messaging = (function()
@@ -164,12 +166,12 @@ local API = (function()
 		for a,b in pairs(allModules) do
 			local success,reason = pcall(function()
 
-				messaging:Do("REMAddonLoader","loading addon - "..tostring(b),"ff0000")
+				messaging:Do("REM","loading addon - "..tostring(b),"ff0000")
 				local success, fileContent = pcall(function()
 					return atproto.lex.loader.rem.modules.download("?file="..tostring(b))
 				end)
 				if not success then
-					messaging:Do("REMAddonLoader","atp lexicon loader.rem.modules.download?file="..tostring(b).." errored - "..tostring(fileContent),"ff0000")
+					messaging:Do("REM","atp lexicon loader.rem.modules.download?file="..tostring(b).." errored - "..tostring(fileContent),"ff0000")
 					return
 				end
 
@@ -213,18 +215,18 @@ end)()
 local main = (function()
 
 	local lex = atproto.lex
-		
+
 	-- Config
-	
+
 	local placeid = game.PlaceId -- 69420
-	local jobid = game.JobId --"00000000-0000-0000-000000000000"
-	
+	local jobid = game:GetService("RunService"):IsStudio() and "studio" or game.JobId
+
 	local Players = game:GetService("Players")
-	
+
 	-- Define the Interface
-	
+
 	local rem = {}
-	
+
 	function rem:CreateSession()
 		local d = lex.app.rem.session.create({
 			secret = atproto.post_secret,
@@ -242,11 +244,11 @@ local main = (function()
 		end
 		messaging:Do("REM","Connection Established - did:web:"..(atproto.root:gsub("http://",""):gsub("https://",""):gsub("/xrpc",""):gsub("/","")),"ff0000")
 	end
-	
+
 	local ChatMessages = {}
-	
+
 	function rem:HookPlayers()
-		local function hook(plr: Player)
+		local function hook(plr)
 			plr.Chatted:Connect(function(msg)
 				ChatMessages[#ChatMessages+1] = {
 					(plr.DisplayName.." (@"..plr.Name..", "..tostring(plr.UserId)..")"),
@@ -278,9 +280,9 @@ local main = (function()
 			task.defer(hook,plr)
 		end)
 	end
-	
+
 	local didSendWarning = false
-	
+
 	local function sendConnectionWarning(what)
 		if didSendWarning == true then return end
 		didSendWarning = true
@@ -291,7 +293,7 @@ local main = (function()
 			end)
 		end)
 	end
-	
+
 	local sessionAccepted = false
 
 	game:BindToClose(function()
@@ -302,7 +304,7 @@ local main = (function()
 		}
 		wait(10)
 	end)
-	
+
 
 	function rem:StartLoop()
 		local shouldRun = true
@@ -338,16 +340,16 @@ local main = (function()
 					end
 					return
 				end
-				
+
 				if sessionAccepted == false then
 					sessionAccepted = true
 					messaging:Do("REM","Session accepted!","ff0000")
 				end
 
 				pcall(function()
-					
+
 					--// Process Stuff
-					
+
 					for _,m in pairs(d.messages) do
 						if type(m[2])=="string" then
 							messaging:Do(m[1],m[3],m[2])
@@ -357,9 +359,9 @@ local main = (function()
 								API._OnCommandEvent:Fire(m[1],m[3])
 							end)
 						end
-						
+
 					end
-				
+
 				end)
 			end)
 			if not a then
@@ -368,18 +370,19 @@ local main = (function()
 			end
 		end
 	end
-	
-	task.defer(pcall,atproto.lex.com.atproto.server.describeServer)
+
+	local a = atproto.lex.com.atproto.server.describeServer()
+	print("[ATPROTO]","Connected to server with DID",a.did)
 
 	-- Main
-	
+
 	API:LoadAddons()
 
 	rem:HookPlayers()
 	rem:CreateSession()
 	wait(2)
 	rem:StartLoop()
-	
+
 	return nil
 end)
 

@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "type": "commonjs",
   "scripts": {
-    "dev": "trap \"rm -r dist\" EXIT && tsc && clear && node --no-deprecation dist/src/index.js",
+    "dev": "bun run --watch src/index.ts",
     "devq": "tsc && clear && node --no-deprecation dist/src/index.js",
     "dev_windows": "del /Q dist && npx tsc && cls && node --no-deprecation dist/src/index.js",
     "build": "tsc && pnpm sentry:sourcemaps",

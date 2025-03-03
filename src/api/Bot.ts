@@ -1,4 +1,3 @@
-import { version } from "../../package.json";
 import * as config from "../../config.json";
 
 import {
@@ -13,15 +12,7 @@ import {
 	Interaction,
 	APIEmbed,
 	APIEmbedField,
-	ForumChannel,
-	GuildForumThreadCreateOptions,
-	MessageCreateOptions,
-	ThreadChannel,
-	StartThreadOptions,
-	MessagePayload,
-	Message,
-	DefaultWebSocketManagerOptions,
-	ActivityType,
+	ForumChannel, ThreadChannel, Message, ActivityType,
 	ActionRowBuilder,
 	ButtonBuilder,
 	ButtonStyle,
@@ -35,13 +26,10 @@ import { Blacklist } from "../../config.json";
 import { Session } from "./Session";
 import { downloadFile } from "./Utility";
 import { tmpdir } from "node:os";
-import { message } from "noblox.js";
 import { checkUserModStatus, getAnonymous, getUserInfo, ModerationReport } from "./db/Prisma";
 import { GetFFlag } from "./db/FFlags";
 import { GenerateResponse } from "./skidtru/ResponseGenerator";
-import { Console, error } from "node:console";
 import { captureException } from "@sentry/node";
-import Module from "node:module";
 
 const intents = [
 	GatewayIntentBits.Guilds,
@@ -344,7 +332,7 @@ client.on(Events.InteractionCreate, async(interaction: Interaction) => {
 				addToLog("Session Accepted",{session: session, userWhoAccepted: interaction.user},0x00ff00)
 
 				const thread: ThreadChannel = await forum.threads.create({
-					name: `${session.JobId.slice(0,5)} - ${session.GameName.slice(0,30)}`,
+					name: `${session.JobId === "studio" ? "dev": session.JobId.slice(0,5)} - ${session.GameName.slice(0,40)}`,
 					message: {
 						files: [filepath],
 						embeds: [embed],

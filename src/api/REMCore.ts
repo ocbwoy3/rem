@@ -99,15 +99,21 @@ export class REMRuntime {
 
 		addToLog("Session Request",{session:newSession,ipAddress:newSession.ServerIPAddress},0x00ff00)
 
-		await this.SessionRequestsChannel?.send({
-			components: ([row] as any),
-			files: [filepath],
-			embeds: [embed]
-		})
+		if (this.SessionRequestsChannel) {
+			await this.SessionRequestsChannel.send({
+				components: ([row] as any),
+				files: [filepath],
+				embeds: [embed]
+			});
+		} else {
+			console.error("SessionRequestsChannel is undefined");
+		}
 
-		await new Promise(f => setTimeout(f, 10000));
-
-		fs.rmSync(filepath)
+		(async()=>{
+			await new Promise(f => setTimeout(f, 10000));
+	
+			fs.rmSync(filepath)
+		})()
 	}
 
 }

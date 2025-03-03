@@ -1,7 +1,7 @@
-import { LexiconDoc } from '@atproto/lexicon'
-import { IncomingSessionMsgRequest, XRPCContext } from '../api/Types'
-import { registerLexicon } from '../api/atproto/LexiconRegistrate'
-import { REMRuntime, getGlobalRuntime } from '../api/REMCore'
+import { LexiconDoc } from '@atproto/lexicon';
+import { IncomingSessionMsgRequest, XRPCContext } from '../api/Types';
+import { registerLexicon } from '../api/atproto/LexiconRegistrate';
+import { REMRuntime, getGlobalRuntime } from '../api/REMCore';
 import { Session } from '../api/Session';
 
 const lexicon: LexiconDoc = {
@@ -47,6 +47,14 @@ async function method(ctx: XRPCContext) {
 				encoding: 'application/json',
 				body: {
 					error: "SESSION_NOT_FOUND"
+				}
+			}
+		}
+		if (!ses.SessionAccepted) {
+			return {
+				encoding: 'application/json',
+				body: {
+					error: "SESSION_WAITING"
 				}
 			}
 		}

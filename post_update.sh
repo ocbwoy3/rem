@@ -1,15 +1,13 @@
 rm -r dist
-npm i
+bun i
 
-npm run build
-node dist/src/setup.js
+bun run src/setup.ts
 clear
 
-npx prisma generate
+bunx prisma generate
 trap "prisma generate" EXIT
-npx prisma migrate dev --name dev
+bunx prisma migrate dev --name dev
 trap "prisma migrate dev --name dev" EXIT
-npm run build
 
 clear
 

@@ -22,8 +22,7 @@ const blacklistedDomains: RegExp[] = [
 
 	/(\.|^)gov\.lv$/,
 	/(\.|^)cia\.gov$/,
-	/(\.|^)trump(hotels|golf|internationalreality|store)?\.com$/,
-	/(\.|^)booktrumpgolf\.com$/,
+	/(\.|^)(get|book)?trump(memes?|golf|hotels|golf|internationalreality|store)?\.com$/,
 	/(\.|^)x\.com$/,
 	/(\.|^)winred\.com$/,
 	/(\.|^)twitter\.com$/,
@@ -38,11 +37,13 @@ const blacklistedDomains: RegExp[] = [
 	/(\.|^)google?\.com$/,
 	/(\.|^)abc\.xyz$/,
 
-	// free hosting
-	
+	// free
+
 	/\.vercel\.app$/,
 	/\.pages\.dev$/,
 	/\.scriptlang\.com$/,
+	/\.railway\.app$/,
+	/\.amazonaws\.com$/,
 
 	// ddns
 

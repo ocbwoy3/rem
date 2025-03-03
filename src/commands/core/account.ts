@@ -126,7 +126,13 @@ export default {
 					}
 					case "gen_proof": {
 						const h = await generateUserLinkingHash(interaction.user.id);
-						return interaction.followUp({ embeds: [genEmbed("Success",`The hash of \`${PDS_DID}|${interaction.user.id}\` is:\n\`\`\`${h}\n\`\`\``,0x00ff00)] }).catch(()=>{});
+						const jc = JSON.stringify({
+							$type: "dev.ocbwoy3.rem.collection",
+							pds: PDS_DID,
+							proof: h
+						},undefined,"\t")
+						const x = `Log into [PDSls](https://pdsls.dev) with your Bluesky account and create a record.\nColllection: \`dev.ocbwoy3.rem.connection\`\nRkey: \`self\`\nContent:\n\`\`\`json\n${jc}\n\`\`\``
+						return interaction.followUp({ embeds: [genEmbed("Success",x,0x00ff00)] }).catch(()=>{});
 					}
 					case "link": {
 						const newHandle: string|undefined = interaction.options.get("handle")?.value as string

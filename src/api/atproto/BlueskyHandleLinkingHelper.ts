@@ -11,7 +11,7 @@ const bskyClient = new BskyAgent({
 })
 
 
-const LINKING_DATA_COLLECTION = "app.rem.actor.connection";
+const LINKING_DATA_COLLECTION = "dev.ocbwoy3.rem.connection";
 
 /*
 
@@ -24,12 +24,12 @@ service:
 
 ----
 
-at://did:plc:s7cesz7cr6ybltaryy4meb6y/app.rem.actor.connection/self
+at://did:plc:s7cesz7cr6ybltaryy4meb6y/dev.ocbwoy3.rem.connection/self
 
 value:
 	pds: did:web:rem.ocbwoy3.dev
 	proof: 5a333f9af07ea421d598f059718dc94508a5e69c (SHA1 Hash of PDS and User's Discord ID)
-	$type: app.rem.actor.connection
+	$type: dev.ocbwoy3.rem.connection
 
 */
 
@@ -42,7 +42,7 @@ export async function generateUserLinkingHash(userid: string): Promise<string> {
 
 export async function isValidLinkTarget(handle: string): Promise<boolean> {
 	const d = await resolveHandleAtprotoData(handle);
-	if (d.pds.endsWith(".bsky.network")) return true;
+	if (d.pds.endsWith(".host.bsky.network")) return true; // allow only mushroom pds' from bluesky
 	return false;
 }
 

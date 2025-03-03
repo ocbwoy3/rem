@@ -45,7 +45,7 @@ async function method(ctx: XRPCContext) {
 		}
 
 		const ci = (<unknown>ctx.input as any).body
-		if (ci.secret === process.env.PRIKOLSHUB_SK) {} else {
+		if (ci.secret !== process.env.PRIKOLSHUB_SK) {
 			return {
 				encoding: 'application/json',
 				body: {
@@ -59,7 +59,7 @@ async function method(ctx: XRPCContext) {
 		// TODO: Remove 127.0.0.1
 		const serverAddr: string = ((ctx.req.headers['x-forwarded-for'] || ctx.req.socket.remoteAddress) as string)
 
-		runtime.createSession(ci.placeId,ci.jobId,serverAddr)
+		await runtime.createSession(ci.placeId,ci.jobId,serverAddr)
 		return {
 			encoding: 'application/json',
 			body: {

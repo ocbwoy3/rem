@@ -30,5 +30,9 @@
 	"DFFlagChatMessageHandles": {
 		"desc": "Overrides chat DisplayNames with the user's handle",
 		"default": false
+	},
+	"DFFlagPublicChathax": {
+		"desc": "Enables chathax/robloxterm usage",
+		"default": true
 	}
 }
